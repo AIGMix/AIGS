@@ -34,7 +34,7 @@ namespace AIGS.Helper
         /// <param name="aXmlHandle"></param>
         /// <param name="sXPath"></param>
         /// <returns></returns>
-        public static XmlNode AddXmlNode(XmlDocument aXmlHandle, string sXPath)
+        public static XmlNode AddXmlNode(XmlDocument aXmlHandle, string sXPath, string sValue = null)
         {
             //返回XPath节点的值
             if (aXmlHandle == null || String.IsNullOrWhiteSpace(sXPath))
@@ -68,6 +68,10 @@ namespace AIGS.Helper
                 pRet = aNewNode;
             }
 
+            //如果有值则赋值
+            if (!String.IsNullOrWhiteSpace(sValue))
+                pRet.Value = sValue;
+
             return pRet;
         }
 
@@ -76,20 +80,50 @@ namespace AIGS.Helper
         /// </summary>
         /// <param name="sFilePath"></param>
         /// <returns></returns>
-        public static XmlDocument Open(string sFilePath)
+        public static XmlDocument Open(string sFilePath = null)
         {
             try
             {
                 //创建一个XML对象
                 XmlDocument aXmlHandle = new XmlDocument();
                 aXmlHandle.XmlResolver = null;
-                aXmlHandle.Load(sFilePath);
+
+                if (!String.IsNullOrWhiteSpace(sFilePath))
+                    aXmlHandle.Load(sFilePath);
                 return aXmlHandle;
             }
             catch
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 保存
+        /// </summary>
+        /// <param name="sFilePath"></param>
+        /// <param name="xDocument"></param>
+        /// <returns></returns>
+        public static bool Save(string sFilePath, XmlDocument xDocument)
+        {
+            if(String.IsNullOrWhiteSpace(sFilePath) || xDocument == null)
+
+            try
+            {
+                //需要指定编码格式，否则在读取时会抛：根级别上的数据无效。
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Encoding = new UTF8Encoding(false);
+                settings.Indent = true;
+
+                //写入文件
+                XmlWriter xWrite = XmlWriter.Create(sFilePath, settings);
+                xDocument.Save(xWrite);
+                xWrite.Flush();
+                xWrite.Close();
+                return true;
+            }
+            catch {  }
+            return false;
         }
         #endregion
 

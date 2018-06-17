@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace AIGS.Helper
@@ -26,7 +27,6 @@ namespace AIGS.Helper
     {
         #region 获取网络版本
 
-        static string FILE_UPDATE_VERSION = "UpdateVersion.xml";
         /***************XML文件说明************************
          *功能：1、提供主程序路径（主程序用于获取版本号）
          *     2、提供待更新的文件列表   
@@ -39,89 +39,58 @@ namespace AIGS.Helper
          *       </DependFile>
          *    </UpdateVersion>
          ************************************************/
-        static string ASHX_FILE_NAME = "AutoUpdate.ashx";
-        static string PHP_FILE_NAME = "AutoUpdate.php";
+        static string FILE_UPDATE_XML = "Update.xml";
+        static string FILE_UPDATE_PHP = "Update.php";
 
-        public static bool CreatUpdateVersionFile(string sOutputDir, string sMainFilePath, string[] sDependFilePaths = NULL)
+        /// <summary>
+        /// 创建更新需要的XML文件
+        /// </summary>
+        /// <param name="sOutputDir">文件输出目录</param>
+        /// <param name="sMainFilePath">主程序</param>
+        /// <param name="sDependFilePaths">依赖文件集合</param>
+        /// <returns></returns>
+        public static bool CreatUpdateVersionFile(string sOutputDir, string sMainFilePath, string[] sDependFilePaths = null)
         {
             if (String.IsNullOrWhiteSpace(sOutputDir) || String.IsNullOrWhiteSpace(sMainFilePath))
                 return false;
 
-            XElement xElement = new XElement(
-                new XElement("UpdateVersion",
-                    new XElement("MainFile", sMainFilePath)
-                    )
-                );
-
-            for(int i = 0; sDependFilePaths != null && i < sDependFilePaths.Count(); i++)
+            XmlDocument xDocument = XmlHelper.Open();
+            XmlHelper.AddXmlNode(xDocument, "UpdateVersion\\MainFile", sMainFilePath);
+            for (int i = 0; sDependFilePaths != null && i < sDependFilePaths.Count(); i++)
             {
-                XmlHelper.AddXmlNode(xElement, "DependFile\\Path");
+                XmlHelper.AddXmlNode(xDocument, "UpdateVersion\\DependFile\\Path", sDependFilePaths[i]);
             }
- 
-             //需要指定编码格式，否则在读取时会抛：根级别上的数据无效。 第 1 行 位置 1异常
-             XmlWriterSettings settings = new XmlWriterSettings();
-             settings.Encoding = new UTF8Encoding(false);
-             settings.Indent = true;
-             XmlWriter xw = XmlWriter.Create(xmlPath,settings);
-             xElement.Save(xw);
-             //写入文件
-             xw.Flush();
-             xw.Close();
-        }
-
-
-
-        public struct FileInfo
-        {
-            public string Name;
-            public string Path;
-        }
-
-        public struct AutoUpdate
-        {
-            public string VersionFile;
-            public List<FileInfo> FileList;
+            XmlHelper.Save(sOutputDir + FILE_UPDATE_XML, xDocument);
+            return true;
         }
 
         /// <summary>
-        /// 新建自动更新的XML文件（测试用）
+        /// 获取网络版本号
         /// </summary>
-        /// <param name="aFilePaths"></param>
-        public static void CreatAutoUpdateFile(List<string> aFilePaths)
-        {
-            if (aFilePaths == null || aFilePaths.Count == 0)
-                return;
-
-            AutoUpdate aRecord = new AutoUpdate();
-            aRecord.VersionFile = aFilePaths[0];
-            aRecord.FileList = new List<FileInfo>();
-
-            for(int i = 0; aFilePaths != null && i < aFilePaths.Count; i++)
-            {
-                string sName = Path.GetFileName(aFilePaths[i]);
-                string sPath = Path.GetDirectoryName(aFilePaths[i]);
-
-                aRecord.FileList.Add(new FileInfo { Name = sName, Path = sPath });
-            }
-
-            string sStr = XmlHelper.ConverObjectToXmlString<AutoUpdate>(aRecord);
-            File.WriteAllText(XML_FLE_NAME, sStr);
-        }
-
-
-
-        /// <summary>
-        /// 是否有新版本
-        /// </summary>
-        /// <param name="sXmlDir"></param>
+        /// <param name="sUpdateXmlPath"></param>
         /// <returns></returns>
-        public static bool HaveNewVersion(string sXmlDir)
+        public static string GetOnlineVersion(string sUpdateXmlPath)
         {
-            string sSelfVersion = VersionHelper.GetSelfVersion();
-            string sOnlineVersion = NetHelper.DownloadString(sXmlDir + '/' + PHP_FILE_NAME);
-            if (!String.IsNullOrWhiteSpace(sOnlineVersion))
-                sOnlineVersion = VersionHelper.GetCorrectString(sOnlineVersion);
+            if (String.IsNullOrWhiteSpace(sUpdateXmlPath))
+                return null;
 
+            string sOnlineVersion = NetHelper.DownloadString(sUpdateXmlPath + '/' + FILE_UPDATE_PHP);
+            return sOnlineVersion;
+        }
+
+        /// <summary>
+        /// 是否需要更新版本
+        /// </summary>
+        /// <param name="sUpdateXmlPath"></param>
+        /// <returns></returns>
+        public static bool NeedUpdate(string sUpdateXmlPath)
+        {
+            string sSelfVersion     = VersionHelper.GetSelfVersion();
+            string sOnlineVersion   = GetOnlineVersion(sUpdateXmlPath);
+            if (String.IsNullOrWhiteSpace(sOnlineVersion))
+                return false;
+
+            sOnlineVersion = VersionHelper.GetCorrectString(sOnlineVersion);
             if (VersionHelper.Compare(sSelfVersion, sOnlineVersion) >= 0)
                 return false;
             return true;
@@ -130,19 +99,43 @@ namespace AIGS.Helper
         /// <summary>
         /// 获取下载的文件列表
         /// </summary>
-        /// <param name="sXmlDir"></param>
+        /// <param name="sUpdateXmlPath"></param>
         /// <returns></returns>
-        static List<FileInfo> GetUpdateFileList(string sXmlDir)
+        static string[] GetUpdateFileList(string sUpdateXmlPath)
         {
-            List<FileInfo> pRet = XmlHelper.ConverXmlFileToObject<List<FileInfo>>(sXmlDir + '/' + XML_FLE_NAME, "AutoUpdate/FileList/FileInfo");
-            if (pRet == null)
+            if (String.IsNullOrWhiteSpace(sUpdateXmlPath))
+                return null;
+
+            XmlNode xNode;
+            XmlDocument xDocument;
+            List<string> pRet = new List<string>();
+
+            //打开XML文件
+            if ((xDocument = XmlHelper.Open(sUpdateXmlPath + '/' + FILE_UPDATE_XML)) == null)
+                return null;
+
+            //添加主文件
+            xNode = XmlHelper.GetXmlNode(xDocument, "UpdateVersion\\MainFile");
+            if (xNode != null && !String.IsNullOrWhiteSpace(xNode.Value))
+                pRet.Add(xNode.Value);
+
+            //添加依赖文件
+            xNode = XmlHelper.GetXmlNode(xDocument, "UpdateVersion\\DependFile");
+            if(xNode != null)
             {
-                pRet = new List<FileInfo>();
-                FileInfo aRecord = XmlHelper.ConverXmlFileToObject<FileInfo>(sXmlDir + '/' + XML_FLE_NAME, "AutoUpdate/FileList/FileInfo");
-                if (!String.IsNullOrWhiteSpace(aRecord.Name) && !String.IsNullOrWhiteSpace(aRecord.Path))
-                    pRet.Add(aRecord);
+                XmlNodeList xList = xNode.ChildNodes;
+                for(int i = 0; xList != null && i < xList.Count; i++)
+                {
+                    if (xList[i].Name != "Path" || String.IsNullOrWhiteSpace(xList[i].Value))
+                        continue;
+                    pRet.Add(xList[i].Value);
+                }
             }
-            return pRet;
+
+            if(pRet.Count == 0)
+                return null;
+
+            return pRet.ToArray();
         }
 
         /// <summary>
@@ -150,15 +143,14 @@ namespace AIGS.Helper
         /// </summary>
         /// <param name="sXmlDir"></param>
         /// <returns></returns>
-        static bool DownloadFiles(string sXmlDir)
+        static bool DownloadFilesToTempDir(string sUpdateXmlPath)
         {
-            List<FileInfo> pFileList = GetUpdateFileList(sXmlDir);
-            if (pFileList.Count == 0)
+            string[] pFileList = GetUpdateFileList(sUpdateXmlPath);
+            if (pFileList == null)
                 return false;
 
-            foreach (FileInfo Info in pFileList)
+            foreach (string sPath in pFileList)
             {
-                string sFilePath = sXmlDir + '/' + Info.Path + '/' + Info.Name;
                 string sToPath = AppDomain.CurrentDomain.BaseDirectory + "\\NewVersion\\" + Info.Name;
                 if(NetHelper.DownloadFile(sFilePath, sToPath) != 0)
                     return false;
