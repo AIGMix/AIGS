@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E0F1B398-B4D4-4536-9135-BE2EB077BBB2}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AIGS</RootNamespace>
     <AssemblyName>AIGS</AssemblyName>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\导航地图数据合成工具\ADASClient\ADASClient\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -30,6 +30,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -55,6 +58,7 @@
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\DllSample.cs" />
     <Compile Include="Common\Message.cs" />
+    <Compile Include="Common\Property.cs" />
     <Compile Include="Common\RefreshControl.cs" />
     <Compile Include="Common\Type.cs" />
     <Compile Include="Control\CListView.cs">
@@ -158,6 +162,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Helper\AboutHelper.cs" />
+    <Compile Include="Helper\BitHelper.cs" />
+    <Compile Include="Helper\ByteAlignHelper.cs" />
     <Compile Include="Helper\CmdHelper.cs" />
     <Compile Include="Helper\ConfigHelper.cs" />
     <Compile Include="Helper\EventWaitHelper.cs" />

@@ -16,6 +16,8 @@ using System.Runtime.InteropServices;
 
 namespace AIGS.Common
 {
+
+
     /// <summary>
     /// C++的结构体转C#结构体
     /// </summary>
@@ -58,12 +60,14 @@ namespace AIGS.Common
         /// <Param name="value">输出字符串 申请方式:StringBuilder Value = new StringBuilder(200);</Param>
         /// <Param name="valueLength">字符串大小</Param>
         /// <Param name="pCallBack">回调函数</Param>
-        [System.Runtime.InteropServices.DllImport("TEST.dll", EntryPoint = "Test", CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport("TEST_AIGS.dll", EntryPoint = "Test", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Test(ref IntPtr intHandle,
                                         StructSample[] objs,
                                         int iObjNum,
                                         StringBuilder value, 
                                         int valueLength,
                                         CallBackSample pCallBack);
+
+       
     }
 }

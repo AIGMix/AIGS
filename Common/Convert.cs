@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using System.IO;
+using System.Reflection;
 
 namespace AIGS.Common
 {
@@ -218,6 +219,36 @@ namespace AIGS.Common
         }
         #endregion
 
+        #endregion
+
+        #region struct->Hash<string,string>
+        /// <summary>
+        /// 将实体结构体转为哈希表
+        /// </summary>
+        /// <param name="aThis"></param>
+        /// <param name="aFlags"></param>
+        /// <returns></returns>
+        public static Dictionary<string, object> ConverStructDictionary(object aThis, BindingFlags aFlags = BindingFlags.Default)
+        {
+            try
+            {
+                Dictionary<string, object> result = new Dictionary<string, object>();
+                PropertyInfo[] aAllInfo = aThis.GetType().GetProperties(aFlags);
+
+                foreach (PropertyInfo aInfo in aAllInfo)
+                {
+                    string sName = aInfo.Name;
+                    object oObject = aInfo.GetValue(aThis, null);
+                    result.Add(sName, oObject);
+                }
+
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
         #endregion
 
         #region enum->Hash<int,string>

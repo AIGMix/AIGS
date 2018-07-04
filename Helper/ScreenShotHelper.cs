@@ -167,6 +167,9 @@ namespace AIGS.Helper
          * 获取截图： 定义回调接口void Func_CutPic(Bitmap aReturnpic);        
          * 附加说明： 如果没有设置回调接口，则在点击“确定”后会弹出保存图片的窗口
          *          可以调用GetCutPic()获取图片
+         * 
+         * 操作说明： 左键-框选、长按移动截图框
+         *          右键-取消框选、退出
         *******************************************************/
         #endregion
 
@@ -233,7 +236,7 @@ namespace AIGS.Helper
 
             // 改变鼠标样式和窗口背景
             m_CutForm.BackgroundImage = aBitmap;
-            m_CutForm.Cursor = Cursors.Cross;
+            m_CutForm.Cursor = Cursors.Default;
 
             //设置窗口的响应
             m_CutForm.MouseDown += Event_MouseDown;
@@ -303,8 +306,8 @@ namespace AIGS.Helper
             // 新建画板和画笔
             Bitmap aFormBmp = (Bitmap)m_CutForm.BackgroundImage.Clone();
             Graphics aGraphics = Graphics.FromImage(aFormBmp);
-            Pen aPen = new Pen(Color.Red, 2);
-            aPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+            Pen aPen = new Pen(Color.OrangeRed, 1);
+            aPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
 
             //画截图的矩形框到画板上（也就是画到BMP图片上）
             m_Rectangle = GetRectangle(m_StartPoint.X, m_StartPoint.Y, e.X, e.Y);
