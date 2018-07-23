@@ -262,6 +262,5 @@ namespace AIGS.Helper
             iValue = AIGS.Helper.BitHelper.set(iFieldValue, iValue, iOffset, iLength);
             return SetValue(aThis, iValueIndex, iValue);
         }
-
     }
 }

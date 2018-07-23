@@ -59,7 +59,4 @@ namespace AIGS.Helper
 
         #endregion
     }
-
-
-
 }

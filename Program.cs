@@ -12,13 +12,13 @@ namespace AIGS
         
         static void Main(string[] args)
         {
-         
+            DownloadFileHepler.CreateGetHttpResponse("http://127.0.0.1:9001/", 1000, "Lin=ff",null);
 
 
-            //Helper.ConfigHelper.GetValue("TETS");
-            //Helper.ScreenShotHelper aScreen = new Helper.ScreenShotHelper();
-            //aScreen.StartCut();
-
+            Helper.ConfigHelper.GetValue("TETS");
+            Helper.ScreenShotHelper aScreen = new Helper.ScreenShotHelper();
+            aScreen.StartCut();
+            
           
         }
     }
