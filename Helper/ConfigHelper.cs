@@ -53,6 +53,32 @@ namespace AIGS.Helper
 
         #region 配置文件基本Key值读写
 
+        ///// <summary>
+        ///// 查询配置文件的值(STRING)
+        ///// </summary>
+        ///// <param name="sKey">关键字</param>
+        ///// <param name="sGroup">组</param>
+        ///// <param name="sConfigPath">配置文件地址</param>
+        ///// <returns></returns>
+        //public static string GetValue(string sKey, string sGroup = null, string sConfigPath = null)
+        //{
+        //    if (String.IsNullOrWhiteSpace(sKey))
+        //        return "";
+
+        //    //设置配置名
+        //    if (String.IsNullOrWhiteSpace(sConfigPath))
+        //        sConfigPath = GetDefaultPathName();
+
+        //    if (String.IsNullOrWhiteSpace(sGroup))
+        //        sGroup = "";
+
+        //    //读取相应值
+        //    StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
+        //    GetPrivateProfileString(sGroup, sKey, "", sValue, MAX_VALUE_LEN, sConfigPath);
+
+        //    return sValue.ToString();
+        //}
+
         /// <summary>
         /// 查询配置文件的值(STRING)
         /// </summary>
@@ -60,33 +86,7 @@ namespace AIGS.Helper
         /// <param name="sGroup">组</param>
         /// <param name="sConfigPath">配置文件地址</param>
         /// <returns></returns>
-        public static string GetValue(string sKey, string sGroup = null, string sConfigPath = null)
-        {
-            if (String.IsNullOrWhiteSpace(sKey))
-                return "";
-
-            //设置配置名
-            if (String.IsNullOrWhiteSpace(sConfigPath))
-                sConfigPath = GetDefaultPathName();
-
-            if (String.IsNullOrWhiteSpace(sGroup))
-                sGroup = "";
-
-            //读取相应值
-            StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
-            GetPrivateProfileString(sGroup, sKey, "", sValue, MAX_VALUE_LEN, sConfigPath);
-
-            return sValue.ToString();
-        }
-
-        /// <summary>
-        /// 查询配置文件的值(STRING)
-        /// </summary>
-        /// <param name="sKey">关键字</param>
-        /// <param name="sGroup">组</param>
-        /// <param name="sConfigPath">配置文件地址</param>
-        /// <returns></returns>
-        public static string GetValue(string sKey, string sDefault, string sGroup = null, string sConfigPath = null)
+        public static string GetValue(string sKey, string sDefault = null, string sGroup = null, string sConfigPath = null)
         {
             if (String.IsNullOrWhiteSpace(sKey))
                 return sDefault;
@@ -118,7 +118,7 @@ namespace AIGS.Helper
         public static int GetValue(string sKey, int iDefault, string sGroup = null, string sConfigPath = null)
         {
             int iRet;
-            string sValue = GetValue(sKey, sGroup, sConfigPath);
+            string sValue = GetValue(sKey, null, sGroup, sConfigPath);
             if (!String.IsNullOrWhiteSpace(sValue))
             {
                 if (int.TryParse(sValue, out iRet))
@@ -139,7 +139,7 @@ namespace AIGS.Helper
         public static float GetValue(string sKey, float fDefault, string sGroup = null, string sConfigPath = null)
         {
             float fRet;
-            string sValue = GetValue(sKey, sGroup, sConfigPath);
+            string sValue = GetValue(sKey, null, sGroup, sConfigPath);
             if (!String.IsNullOrWhiteSpace(sValue))
             {
                 if (float.TryParse(sValue, out fRet))
@@ -147,6 +147,27 @@ namespace AIGS.Helper
             }
 
             return fDefault;
+        }
+
+        /// <summary>
+        /// 查询配置文件的值(bool)
+        /// </summary>
+        /// <param name="sKey">关键字</param>
+        /// <param name="bDefault">默认值</param>
+        /// <param name="sGroup">组</param>
+        /// <param name="sConfigPath">配置文件地址</param>
+        /// <returns></returns>
+        public static bool GetValue(string sKey, bool bDefault, string sGroup = null, string sConfigPath = null)
+        {
+            bool bRet;
+            string sValue = GetValue(sKey, null, sGroup, sConfigPath);
+            if (!String.IsNullOrWhiteSpace(sValue))
+            {
+                if (bool.TryParse(sValue, out bRet))
+                    return bRet;
+            }
+
+            return bDefault;
         }
 
         /// <summary>
@@ -194,9 +215,21 @@ namespace AIGS.Helper
         /// <param name="sValue">值</param>
         /// <param name="sGroup">组</param>
         /// <param name="sConfigPath">配置文件路径</param>
-        public static void SetValue(string sKey, float fValue, string sConfigPath = null)
+        public static void SetValue(string sKey, float fValue, string sGroup = null, string sConfigPath = null)
         {
-            SetValue(sKey, fValue.ToString(), sConfigPath);
+            SetValue(sKey, fValue.ToString(), sGroup, sConfigPath);
+        }
+
+        /// <summary>
+        /// 设置配置文件的值(bool)
+        /// </summary>
+        /// <param name="sKey">关键字</param>
+        /// <param name="sValue">值</param>
+        /// <param name="sGroup">组</param>
+        /// <param name="sConfigPath">配置文件路径</param>
+        public static void SetValue(string sKey, bool bValue, string sGroup = null, string sConfigPath = null)
+        {
+            SetValue(sKey, bValue.ToString(), sGroup, sConfigPath);
         }
 
         #endregion

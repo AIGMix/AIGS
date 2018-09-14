@@ -14,6 +14,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 namespace AIGS.Helper
 {
     public class NetHelper
@@ -74,7 +75,19 @@ namespace AIGS.Helper
             }
         }
 
+        /// <summary>
+        /// 用浏览器打开网页
+        /// </summary>
+        /// <param name="sUrl"></param>
+        public static void OpenWeb(string sUrl)
+        {
+            if (String.IsNullOrWhiteSpace(sUrl))
+                return;
 
+            Process.Start(new ProcessStartInfo(sUrl));
+        }
+
+        #region 提供超时机制的WebClient
 
         /// <summary>
         /// 提供超时机制的WebClient
@@ -104,9 +117,7 @@ namespace AIGS.Helper
                 return request;
             }
         }
-
-
-
+        #endregion
 
 
         #region 文件的下载和上传

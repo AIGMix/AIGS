@@ -55,6 +55,30 @@ namespace AIGS.Helper
             return iHour * 60 * 60 + iMine * 60 + iSecond;
         }
 
+        /// <summary>
+        /// 获取当前时间
+        /// </summary>
+        /// <returns></returns>
+        public static System.DateTime GetCurrentTime()
+        {
+            return System.DateTime.Now;
+        }
+
+        /// <summary>
+        /// 获取时间消耗（毫秒）
+        /// </summary>
+        /// <param name="aStartTime"></param>
+        /// <returns></returns>
+        public static long CalcConsumeTime(System.DateTime aStartTime)
+        {
+            System.DateTime aCurTime = GetCurrentTime();
+
+            int iEndRet = aCurTime.Hour * 3600000 + aCurTime.Minute * 60000 + aCurTime.Second * 1000 + aCurTime.Millisecond;
+            int iStartRet = aStartTime.Hour * 3600000 + aStartTime.Minute * 60000 + aStartTime.Second * 1000 + aStartTime.Millisecond;
+
+            return iEndRet - iStartRet;
+        }
+
         #endregion
 
         #region 定时器内部参数与接口

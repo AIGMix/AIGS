@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Reflection;
+using System.Drawing;
+using System.Windows;
 
 namespace AIGS.Common
 {
@@ -337,6 +339,8 @@ namespace AIGS.Common
 
         #endregion
 
+        #region Bitmap
+        
         /// <summary>
         /// Byte[] -> BitmapImage
         /// </summary>
@@ -358,5 +362,50 @@ namespace AIGS.Common
             }
             return bmp;
         }
+
+        /// <summary>
+        /// Bitmap -> BitmapImage
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns></returns>
+        public static BitmapImage ConverBitmapToBitmapImage(Bitmap bitmap)
+        {
+            Bitmap bitmapSource = new Bitmap(bitmap.Width, bitmap.Height);
+            int i, j;
+            for (i = 0; i < bitmap.Width; i++)
+                for (j = 0; j < bitmap.Height; j++)
+                {
+                    Color pixelColor = bitmap.GetPixel(i, j);
+                    Color newColor = Color.FromArgb(pixelColor.R, pixelColor.G, pixelColor.B);
+                    bitmapSource.SetPixel(i, j, newColor);
+                }
+            MemoryStream ms = new MemoryStream();
+            bitmapSource.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = new MemoryStream(ms.ToArray());
+            bitmapImage.EndInit();
+
+            return bitmapImage;
+        }
+
+        /// <summary>
+        ///  Bitmap -> ImageSource
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns></returns>
+        public static System.Windows.Media.ImageSource ConverBitmapToImageSource(Bitmap bitmap)
+        {
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            System.Windows.Media.ImageSource wpfBitmap = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+            hBitmap,
+            IntPtr.Zero,
+            Int32Rect.Empty,
+            BitmapSizeOptions.FromEmptyOptions());
+
+            return wpfBitmap;
+        }
+
+        #endregion
     }
 }

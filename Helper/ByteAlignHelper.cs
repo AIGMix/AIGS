@@ -39,7 +39,7 @@ namespace AIGS.Helper
     public struct AIGS_DATE2
     {
         [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 2, ArraySubType = UnmanagedType.U4)]
-        public uint[] Value;
+        public uint[] StructValue;
 
         [ByteAlignHelper.FieldInfo(23)]
         public uint Year
@@ -94,9 +94,9 @@ namespace AIGS.Helper
                 FieldInfo[] aArrary = aType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
                 foreach (FieldInfo aField in aArrary)
                 {
-                    if (aField.Name == "Value")
+                    if (aField.Name == "StructValue")
                     {
-                        if (aField.FieldType != typeof(uint[]))
+                        if (aField.FieldType != typeof(uint[]) && aField.FieldType != typeof(uint))
                             return null;
 
                         return aField;
@@ -125,11 +125,16 @@ namespace AIGS.Helper
             if (aValue == null)
                 return 0;
 
-            uint[] aValueList = (uint[])aValue;
-            if (aValueList == null || aValueList.Count() <= iIndex)
-                return 0;
+            if (aValue.GetType() == typeof(uint[]))
+            {
+                uint[] aValueList = (uint[])aValue;
+                if (aValueList == null || aValueList.Count() <= iIndex)
+                    return 0;
 
-            return aValueList[iIndex];
+                return aValueList[iIndex];
+            }
+            else
+                return (uint)aValue;
         }
 
         /// <summary>
@@ -166,7 +171,7 @@ namespace AIGS.Helper
         static int GetFieldLength(PropertyInfo aInfo)
         {
             object[] aAttributes = aInfo.GetCustomAttributes(typeof(FieldInfoAttribute), false);
-            if (aAttributes != null || aAttributes.Length == 1)
+            if (aAttributes != null && aAttributes.Length == 1)
                 return ((FieldInfoAttribute)aAttributes[0]).Length;
 
             return 0;

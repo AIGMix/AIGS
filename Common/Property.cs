@@ -9,11 +9,15 @@ namespace AIGS.Common
     {
         public object Key { get; set; }
         public object Value { get; set; }
+        public object Desc { get; set; }
 
-        public Property(object sKey, object sValue)
+        public Property() { }
+
+        public Property(object sKey, object sValue = null, object sDesc = null )
         {
             Key = sKey;
             Value = sValue;
+            Desc = sDesc;
         }
         
         public Property(string sKey) 
@@ -21,6 +25,7 @@ namespace AIGS.Common
             Key = sKey;
             Value = "";
         }
-        public Property() { }
+
+
     }
 }
