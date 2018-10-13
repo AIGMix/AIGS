@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AIGS.Helper
 {
@@ -95,6 +96,39 @@ namespace AIGS.Helper
             }
             return pRet;
         }
+
+
+        /// <summary>
+        /// 获取子串。
+        /// </summary>
+        /// <param name="sMsg">字符串</param>
+        /// <param name="FindStr">寻找的Key,如果有等于号需要加上,如“key=”</param>
+        /// <param name="EndChar">寻找的结束符号</param>
+        public static string GetSubString(string sMsg, string FindStr, string EndChar)
+        {
+            string formt = FindStr + "(.*)";
+            if (!string.IsNullOrWhiteSpace(EndChar))
+                formt = FindStr + "(.*?)" + EndChar;
+
+            Regex reg = new Regex(formt);
+            Match aTmp = reg.Match(sMsg);
+            if (string.IsNullOrWhiteSpace(aTmp.Value))
+            {
+                if (!string.IsNullOrWhiteSpace(EndChar))
+                    return GetSubString(sMsg, FindStr, null);
+                return null;
+            }
+
+            string sText = aTmp.Value;
+            int iLen = sText.Length - FindStr.Length;
+            iLen -= string.IsNullOrWhiteSpace(EndChar) ? 0 : EndChar.Length;
+            sText = sText.Substring(FindStr.Length, iLen);
+
+            return sText;
+        }
+
+
+
 
         #region 删除重复字符
         /// <summary>
