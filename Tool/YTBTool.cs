@@ -7,9 +7,149 @@ using System.IO;
 using System.Web;
 using System.Collections.Specialized;
 using System.Collections;
+using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace AIGS.Tool
 {
+    internal static class Decipherer
+    {
+        public static string DecipherWithVersion(string cipher, string cipherVersion)
+        {
+            string jsUrl = string.Format("http://s.ytimg.com/yts/jsbin/player-{0}.js", cipherVersion);
+            string js = NetHelper.DownloadString(jsUrl);
+
+            //Find "C" in this: var A = B.sig||C (B.s)
+            string functNamePattern = @"(\w+)\s*=\s*function\(\s*(\w+)\s*\)\s*{\s*\2\s*=\s*\2\.split\(\""\""\)\s*;(.+)return\s*\2\.join\(\""\""\)\s*}\s*;";
+
+            var funcName = Regex.Match(js, functNamePattern).Groups[1].Value;
+
+            if (funcName.Contains("$"))
+            {
+                funcName = "\\" + funcName; //Due To Dollar Sign Introduction, Need To Escape
+            }
+
+            string funcPattern = @"(?!h\.)" + @funcName + @"=function\(\w+\)\{.*?\}"; //Escape funcName string
+            var funcBody = Regex.Match(js, funcPattern, RegexOptions.Singleline).Value; //Entire sig function
+            var lines = funcBody.Split(';'); //Each line in sig function
+
+            string idReverse = "", idSlice = "", idCharSwap = ""; //Hold name for each cipher method
+            string functionIdentifier = "";
+            string operations = "";
+
+            foreach (var line in lines.Skip(1).Take(lines.Length - 2)) //Matches the funcBody with each cipher method. Only runs till all three are defined.
+            {
+                if (!string.IsNullOrEmpty(idReverse) && !string.IsNullOrEmpty(idSlice) &&
+                    !string.IsNullOrEmpty(idCharSwap))
+                {
+                    break; //Break loop if all three cipher methods are defined
+                }
+
+                functionIdentifier = GetFunctionFromLine(line);
+                string reReverse = string.Format(@"{0}:\bfunction\b\(\w+\)", functionIdentifier); //Regex for reverse (one parameter)
+                string reSlice = string.Format(@"{0}:\bfunction\b\([a],b\).(\breturn\b)?.?\w+\.", functionIdentifier); //Regex for slice (return or not)
+                string reSwap = string.Format(@"{0}:\bfunction\b\(\w+\,\w\).\bvar\b.\bc=a\b", functionIdentifier); //Regex for the char swap.
+
+                if (Regex.Match(js, reReverse).Success)
+                {
+                    idReverse = functionIdentifier; //If def matched the regex for reverse then the current function is a defined as the reverse
+                }
+
+                if (Regex.Match(js, reSlice).Success)
+                {
+                    idSlice = functionIdentifier; //If def matched the regex for slice then the current function is defined as the slice.
+                }
+
+                if (Regex.Match(js, reSwap).Success)
+                {
+                    idCharSwap = functionIdentifier; //If def matched the regex for charSwap then the current function is defined as swap.
+                }
+            }
+
+            foreach (var line in lines.Skip(1).Take(lines.Length - 2))
+            {
+                Match m;
+                functionIdentifier = GetFunctionFromLine(line);
+
+                if ((m = Regex.Match(line, @"\(\w+,(?<index>\d+)\)")).Success && functionIdentifier == idCharSwap)
+                {
+                    operations += "w" + m.Groups["index"].Value + " "; //operation is a swap (w)
+                }
+
+                if ((m = Regex.Match(line, @"\(\w+,(?<index>\d+)\)")).Success && functionIdentifier == idSlice)
+                {
+                    operations += "s" + m.Groups["index"].Value + " "; //operation is a slice
+                }
+
+                if (functionIdentifier == idReverse) //No regex required for reverse (reverse method has no parameters)
+                {
+                    operations += "r "; //operation is a reverse
+                }
+            }
+
+            operations = operations.Trim();
+
+            return DecipherWithOperations(cipher, operations);
+        }
+
+        private static string ApplyOperation(string cipher, string op)
+        {
+            switch (op[0])
+            {
+                case 'r':
+                    return new string(cipher.ToCharArray().Reverse().ToArray());
+
+                case 'w':
+                    {
+                        int index = GetOpIndex(op);
+                        return SwapFirstChar(cipher, index);
+                    }
+
+                case 's':
+                    {
+                        int index = GetOpIndex(op);
+                        return cipher.Substring(index);
+                    }
+
+                default:
+                    throw new NotImplementedException("Couldn't find cipher operation.");
+            }
+        }
+
+        private static string DecipherWithOperations(string cipher, string operations)
+        {
+            return operations.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                .Aggregate(cipher, ApplyOperation);
+        }
+
+        private static string GetFunctionFromLine(string currentLine)
+        {
+            Regex matchFunctionReg = new Regex(@"\w+\.(?<functionID>\w+)\("); //lc.ac(b,c) want the ac part.
+            Match rgMatch = matchFunctionReg.Match(currentLine);
+            string matchedFunction = rgMatch.Groups["functionID"].Value;
+            return matchedFunction; //return 'ac'
+        }
+
+        private static int GetOpIndex(string op)
+        {
+            string parsed = new Regex(@".(\d+)").Match(op).Result("$1");
+            int index = Int32.Parse(parsed);
+
+            return index;
+        }
+
+        private static string SwapFirstChar(string cipher, int index)
+        {
+            var builder = new StringBuilder(cipher);
+            builder[0] = cipher[index];
+            builder[index] = cipher[0];
+
+            return builder.ToString();
+        }
+    }
+
+
+
     public class YTBTool
     {
         #region 宏定义
@@ -317,13 +457,14 @@ namespace AIGS.Tool
         /// <param name="sUrl"></param>
         /// <param name="sStreamMapObj"></param>
         /// <returns></returns>
-        static string GetRelUrl(string sUrl, string sStreamMapObj)
+        static string GetRelUrl(string sUrl, string sStreamMapObj, string htmlPlayerVersion)
         {
             string sEncryptedSig = null;
             string sSignature    = GetStringPara(sStreamMapObj, "Sig");
             if(String.IsNullOrWhiteSpace(sSignature))
             {
                 sEncryptedSig = GetStringPara(sStreamMapObj, "S");
+                sSignature = Decipherer.DecipherWithVersion(sEncryptedSig, htmlPlayerVersion);
             }
             sUrl = HttpUtility.UrlDecode(sUrl, Encoding.UTF8);
             sUrl += "&signature=" + sSignature;
@@ -338,7 +479,7 @@ namespace AIGS.Tool
         /// </summary>
         /// <param name="sString"></param>
         /// <returns></returns>
-        static List<DownloadUrlInfo> GetDownloadUrlInfo(string sString)
+        static List<DownloadUrlInfo> GetDownloadUrlInfo(string sString, string htmlPlayerVersion)
         {
             List<DownloadUrlInfo> aRet = new List<DownloadUrlInfo>();
 
@@ -366,7 +507,7 @@ namespace AIGS.Tool
                 else
                     sResolution = GetStringPara(sBuf, "Size");
 
-                aInfo.Url             = GetRelUrl(sUrl, sBuf);
+                aInfo.Url             = GetRelUrl(sUrl, sBuf, htmlPlayerVersion);
                 aInfo.iTag            = Common.Convert.ConverStringToInt(iTag);
                 aInfo.Quality         = GetStringPara(sBuf, "Quality");
                 aInfo.Resolution      = sResolution;
@@ -413,6 +554,11 @@ namespace AIGS.Tool
                 goto RETURN;
             }
 
+            //Test
+            JObject Jason =  LoadJson(sUrl);
+            string htmlPlayerVersion = GetHtml5PlayerVersion(Jason);
+
+
             //从网上下载信息
             string sString = NetHelper.DownloadString(m_PreGetInfo + sID, 1000);
             if (String.IsNullOrWhiteSpace(sString))
@@ -425,8 +571,7 @@ namespace AIGS.Tool
             sTitle       = GetStringPara(sString, "Title");
             sPhotoUrl    = GetStringPara(sString, "PhotoUrl");
             sDuration    = GetStringPara(sString, "Duration");
-            pDownloadUrl = GetDownloadUrlInfo(sString);
-            //GetNetWorkData(sID);
+            pDownloadUrl = GetDownloadUrlInfo(sString, htmlPlayerVersion);
 
         RETURN:
             aInfo.ID           = sID;
@@ -438,5 +583,45 @@ namespace AIGS.Tool
             aInfo.DownloadUrls = pDownloadUrl;
             return aInfo;
         }
+
+        #region Tets
+        private static bool IsVideoUnavailable(string pageSource)
+        {
+            const string unavailableContainer = "<div id=\"watch-player-unavailable\">";
+
+            return pageSource.Contains(unavailableContainer);
+        }
+
+        private static string GetHtml5PlayerVersion(JObject json)
+        {
+            var regex = new Regex(@"player-(.+?).js");
+
+            string js = json["assets"]["js"].ToString();
+
+            return regex.Match(js).Result("$1");
+        }
+
+        private static JObject LoadJson(string url)
+        {
+            string pageSource = NetHelper.DownloadString(url, 5000); 
+
+            if (IsVideoUnavailable(pageSource))
+            {
+                return null;
+            }
+
+            var dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+
+            string extractedJson = dataRegex.Match(pageSource).Result("$1");
+
+            return JObject.Parse(extractedJson);
+        }
+
+        #endregion
+
+
     }
+
 }
+
+
