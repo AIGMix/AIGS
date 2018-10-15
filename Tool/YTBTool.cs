@@ -14,16 +14,21 @@ namespace AIGS.Tool
 {
     internal static class Decipherer
     {
-        public static string DecipherWithVersion(string cipher, string cipherVersion)
+        public static string DecipherWithOperations(string cipher, string operations)
+        {
+            return operations.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries).Aggregate(cipher, ApplyOperation);
+        }
+
+        public static string DecipherWithVersion(string cipherVersion)
         {
             string jsUrl = string.Format("http://s.ytimg.com/yts/jsbin/player-{0}.js", cipherVersion);
             string js = NetHelper.DownloadString(jsUrl);
+            if (String.IsNullOrWhiteSpace(js))
+                return null;
 
             //Find "C" in this: var A = B.sig||C (B.s)
             string functNamePattern = @"(\w+)\s*=\s*function\(\s*(\w+)\s*\)\s*{\s*\2\s*=\s*\2\.split\(\""\""\)\s*;(.+)return\s*\2\.join\(\""\""\)\s*}\s*;";
-
             var funcName = Regex.Match(js, functNamePattern).Groups[1].Value;
-
             if (funcName.Contains("$"))
             {
                 funcName = "\\" + funcName; //Due To Dollar Sign Introduction, Need To Escape
@@ -36,7 +41,6 @@ namespace AIGS.Tool
             string idReverse = "", idSlice = "", idCharSwap = ""; //Hold name for each cipher method
             string functionIdentifier = "";
             string operations = "";
-
             foreach (var line in lines.Skip(1).Take(lines.Length - 2)) //Matches the funcBody with each cipher method. Only runs till all three are defined.
             {
                 if (!string.IsNullOrEmpty(idReverse) && !string.IsNullOrEmpty(idSlice) &&
@@ -87,9 +91,7 @@ namespace AIGS.Tool
                 }
             }
 
-            operations = operations.Trim();
-
-            return DecipherWithOperations(cipher, operations);
+            return operations.Trim();
         }
 
         private static string ApplyOperation(string cipher, string op)
@@ -114,12 +116,6 @@ namespace AIGS.Tool
                 default:
                     throw new NotImplementedException("Couldn't find cipher operation.");
             }
-        }
-
-        private static string DecipherWithOperations(string cipher, string operations)
-        {
-            return operations.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
-                .Aggregate(cipher, ApplyOperation);
         }
 
         private static string GetFunctionFromLine(string currentLine)
@@ -158,6 +154,28 @@ namespace AIGS.Tool
         static string m_PreGetInfo = "http://www.youtube.com/get_video_info?video_id=";
         static string[] m_PreVideo = { "https://www.youtube.com/watch?v=", "http://www.youtube.com/watch?v=" };
         
+        static string H_FLAG_TITLE           = "title";
+        static string H_FLAG_PHOTOURL        = "thumbnail_url";
+        static string H_FLAG_DURATION        = "length_seconds";
+        static string H_FLAG_FMTLIST         = "fmt_list";
+
+        static string H_FLAG_STREAM_MAP      = "url_encoded_fmt_stream_map";
+        static string H_FLAG_ADAPTIVE_FMT    = "adaptive_fmts";
+
+        static string H_FLAG_DOWNLOAD_URL    = "url";
+        static string H_FLAG_SIGNATURATE_S   = "s";
+        static string H_FLAG_SIGNATURATE_SIG = "sig";
+        static string H_FLAG_ITAG            = "itag";
+        static string H_FLAG_TYPE            = "type";
+        static string H_FLAG_QUALITY         = "quality";
+        static string H_FLAG_QUALITY2        = "quality_label";
+
+        static string H_FLAG_FILESIZE        = "clen";
+        static string H_FLAG_BITERATE        = "bitrate";
+        static string H_FLAG_FPS             = "fps";
+        static string H_FLAG_RESOLUTION      = "size";
+        static string H_FLAG_RATE_BY_PASEE   = "ratebypass";
+
         #endregion
 
         #region 枚举与结构体
@@ -165,8 +183,10 @@ namespace AIGS.Tool
         public enum ErrCode
         {
             Success,
-            UrlErr,
-            GetVideoInfoErr,
+            UrlErr,             
+            GetVideoInfoErr,    
+            GetVideJasonErr,
+            GetOperationErr,
         }
 
         public enum Extension
@@ -237,67 +257,6 @@ namespace AIGS.Tool
             return null;
         }
 
-        static string GetNetWorkData(string sID)
-        {
-            string sUrl     = m_PreGetInfo + sID;
-            string sString  = NetHelper.DownloadString(sUrl, 5000);
-            string sMsg = sString;// HttpUtility.UrlDecode(sString, Encoding.UTF8);
-
-            byte[] data;
-            string[] sArray = sMsg.Split('&');
-            FileStream fs = new FileStream("E:\\ak2.txt", FileMode.Create);
-            for (int i = 0; i < sArray.Count(); i++)
-            {
-                data = System.Text.Encoding.Default.GetBytes(sArray[i]);
-                fs.Write(data, 0, data.Length);
-
-                data = System.Text.Encoding.Default.GetBytes("\n");
-                fs.Write(data, 0, data.Length);
-            }
-            fs.Flush();
-            fs.Close();
-
-            sMsg =HttpUtility.UrlDecode(sString, Encoding.UTF8);
-            sArray = sMsg.Split('&');
-            fs = new FileStream("E:\\ak3.txt", FileMode.Create);
-            for (int i = 0; i < sArray.Count(); i++)
-            {
-                data = System.Text.Encoding.Default.GetBytes(sArray[i]);
-                fs.Write(data, 0, data.Length);
-
-                data = System.Text.Encoding.Default.GetBytes("\n");
-                fs.Write(data, 0, data.Length);
-            }
-            fs.Flush();
-            fs.Close();
-
-            sMsg = HttpUtility.UrlDecode(sMsg, Encoding.UTF8);
-            sMsg = HttpUtility.UrlDecode(sMsg, Encoding.UTF8);
-            sArray = sMsg.Split('&');
-            fs = new FileStream("E:\\ak4.txt", FileMode.Create);
-            for (int i = 0; i < sArray.Count(); i++)
-            {
-                data = System.Text.Encoding.Default.GetBytes(sArray[i]);
-                fs.Write(data, 0, data.Length);
-
-                data = System.Text.Encoding.Default.GetBytes("\n");
-                fs.Write(data, 0, data.Length);
-            }
-            fs.Flush();
-            fs.Close();
-
-
-            fs = new FileStream("E:\\ak.txt", FileMode.Create);
-            data = System.Text.Encoding.Default.GetBytes(sMsg);
-            fs.Write(data, 0, data.Length);
-            //清空缓冲区、关闭流
-            fs.Flush();
-            fs.Close();
-
-
-            return sMsg;
-        }
-
         /// <summary>
         /// 获取标题
         /// </summary>
@@ -306,63 +265,15 @@ namespace AIGS.Tool
         static string GetStringPara(string sString, string sKey)
         {
             string sRet;
-            List<string> sFindString = new List<string>();
-
-            if (sKey == "Title")
-                sFindString.Add("title=");
-            if (sKey == "PhotoUrl")
-                sFindString.Add("thumbnail_url=");
-            if (sKey == "Duration")
-                sFindString.Add("length_seconds=");
-
-            if (sKey == "FmtList")
-                sFindString.Add("fmt_list=");
-            if (sKey == "UrlEncodedFmtStreamMap")
-                sFindString.Add("url_encoded_fmt_stream_map=");
-            if (sKey == "AdaptiveFmts")
-                sFindString.Add("adaptive_fmts=");
-
-            if (sKey == "Url")
-                sFindString.Add("url=");
-            if (sKey == "S")
-                sFindString.Add("s=");
-            if (sKey == "Itag")
-                sFindString.Add("itag=");
-            if (sKey == "Type")
-                sFindString.Add("type=");
-            if (sKey == "Quality")
-            {
-                sFindString.Add("quality=");
-                sFindString.Add("quality_label=");
-            }
-
-            if (sKey == "Dur")
-                sFindString.Add("dur=");
-            if (sKey == "Clen")
-                sFindString.Add("clen=");
-            if (sKey == "BitRate")
-                sFindString.Add("bitrate=");
-            if (sKey == "Fps")
-                sFindString.Add("fps=");
-            if (sKey == "Size")
-                sFindString.Add("size=");
-            if (sKey == "Sig")
-                sFindString.Add("sig=");
-            if (sKey == "Ratebypass")
-                sFindString.Add("ratebypass=");
-            
-
+            string sFindKey = sKey + '=';
             string[] sArray = sString.Split('&');
-            for (int i = 0; i < sFindString.Count; i++)
+            for (int j = 0; j < sArray.Count(); j++)
             {
-                for (int j = 0; j < sArray.Count(); j++)
+                if (0 == sArray[j].IndexOf(sFindKey))
                 {
-                    if(0 == sArray[j].IndexOf(sFindString[i]))
-                    {
-                        sRet = sArray[j].Substring(sFindString[i].Length);
-                        sRet = HttpUtility.UrlDecode(sRet, Encoding.UTF8);
-                        return sRet;
-                    }
+                    sRet = sArray[j].Substring(sFindKey.Length);
+                    sRet = HttpUtility.UrlDecode(sRet, Encoding.UTF8);
+                    return sRet;
                 }
             }
 
@@ -374,12 +285,10 @@ namespace AIGS.Tool
         /// </summary>
         /// <param name="sString"></param>
         /// <returns></returns>
-        static Hashtable GetFmtList(string sString)
+        static Hashtable GetFmtList(string sFmtString)
         {
             //18/640x240,36/320x120,17/176x144
             Hashtable FmtListHash = new Hashtable();
-            string sFmtString     = GetStringPara(sString, "FmtList");
-
             string[] sArray       = sFmtString.Split(',');
             foreach (string sBuf in sArray)
             {
@@ -457,18 +366,21 @@ namespace AIGS.Tool
         /// <param name="sUrl"></param>
         /// <param name="sStreamMapObj"></param>
         /// <returns></returns>
-        static string GetRelUrl(string sUrl, string sStreamMapObj, string htmlPlayerVersion)
+        static string GetRelUrl(string sStreamMapObj, string sOperationString)
         {
             string sEncryptedSig = null;
-            string sSignature    = GetStringPara(sStreamMapObj, "Sig");
+            string sSignature    = GetStringPara(sStreamMapObj, H_FLAG_SIGNATURATE_SIG);
             if(String.IsNullOrWhiteSpace(sSignature))
             {
-                sEncryptedSig = GetStringPara(sStreamMapObj, "S");
-                sSignature = Decipherer.DecipherWithVersion(sEncryptedSig, htmlPlayerVersion);
+                sEncryptedSig = GetStringPara(sStreamMapObj, H_FLAG_SIGNATURATE_S);
+                sSignature = Decipherer.DecipherWithOperations(sEncryptedSig, sOperationString);
             }
+
+            string sUrl = GetStringPara(sStreamMapObj, H_FLAG_DOWNLOAD_URL);
+
             sUrl = HttpUtility.UrlDecode(sUrl, Encoding.UTF8);
             sUrl += "&signature=" + sSignature;
-            if (GetStringPara(sUrl, "Ratebypass") == null)
+            if (GetStringPara(sUrl, H_FLAG_RATE_BY_PASEE) == null)
                 sUrl += "&ratebypass=yes";
 
             return sUrl;
@@ -479,55 +391,91 @@ namespace AIGS.Tool
         /// </summary>
         /// <param name="sString"></param>
         /// <returns></returns>
-        static List<DownloadUrlInfo> GetDownloadUrlInfo(string sString, string htmlPlayerVersion)
+        static List<DownloadUrlInfo> GetDownloadUrlInfo(string sStreamMap, string sFmtString, string sOperationString)
         {
             List<DownloadUrlInfo> aRet = new List<DownloadUrlInfo>();
-
-            //获取iTag对应分辨率的哈希表
-            Hashtable FmtListHash = GetFmtList(sString);
-            if (FmtListHash.Count <= 0)
-                return aRet;
+            Hashtable FmtListHash      = GetFmtList(sFmtString);
 
             //解析链接
-            string sStreamMap = GetStringPara(sString, "UrlEncodedFmtStreamMap") + ',' + GetStringPara(sString, "AdaptiveFmts");
-            string[] sArray     = sStreamMap.Split(',');
+            string[] sArray = sStreamMap.Split(',');
             foreach (string sBuf in sArray)
             {
-                string iTag  = GetStringPara(sBuf, "Itag");
-                string sUrl  = GetStringPara(sBuf, "Url");
-                if (String.IsNullOrWhiteSpace(iTag) || String.IsNullOrWhiteSpace(sUrl))
+                string iTag  = GetStringPara(sBuf, H_FLAG_ITAG);
+                if (String.IsNullOrWhiteSpace(iTag))
                     continue;
 
-                DownloadUrlInfo aInfo = new DownloadUrlInfo();
-                string sType = GetStringPara(sBuf, "Type");
-                string sResolution = null;
+                //获取类型
+                string sType = GetStringPara(sBuf, H_FLAG_TYPE);
 
+                //获取分辨率
+                string sResolution = null;
                 if (FmtListHash.ContainsKey(iTag))
                     sResolution = FmtListHash[iTag].ToString();
                 else
-                    sResolution = GetStringPara(sBuf, "Size");
+                    sResolution = GetStringPara(sBuf, H_FLAG_RESOLUTION);
 
-                aInfo.Url             = GetRelUrl(sUrl, sBuf, htmlPlayerVersion);
+                //获取质量
+                string sQuality = GetStringPara(sBuf, H_FLAG_QUALITY);
+                if (sQuality == null)
+                    sQuality = GetStringPara(sBuf, H_FLAG_QUALITY2);
+
+                //获取链接
+                string sUrl = GetRelUrl(sBuf, sOperationString);
+
+                //赋值
+                DownloadUrlInfo aInfo = new DownloadUrlInfo();
+                aInfo.Url             = sUrl;
                 aInfo.iTag            = Common.Convert.ConverStringToInt(iTag);
-                aInfo.Quality         = GetStringPara(sBuf, "Quality");
+                aInfo.Quality         = sQuality;
                 aInfo.Resolution      = sResolution;
                 aInfo.Type            = GetType(sType);
                 aInfo.Extension       = GetExtension(sType);
                 aInfo.Codecs          = GetCodecs(sType);
-                aInfo.Fps             = Common.Convert.ConverStringToInt(GetStringPara(sBuf, "Fps"));
-                aInfo.BitRate         = Common.Convert.ConverStringToInt(GetStringPara(sBuf, "BitRate"));
+                aInfo.Fps             = Common.Convert.ConverStringToInt(GetStringPara(sBuf, H_FLAG_FPS));
+                aInfo.BitRate         = Common.Convert.ConverStringToInt(GetStringPara(sBuf, H_FLAG_BITERATE));
 
                 string sTmp           = aInfo.Url.Substring(aInfo.Url.IndexOf('?') + 1);
-                aInfo.Size            = Common.Convert.ConverStringToInt(GetStringPara(sTmp, "Clen"));
+                aInfo.Size            = Common.Convert.ConverStringToInt(GetStringPara(sTmp, H_FLAG_FILESIZE));
                 aRet.Add(aInfo);
             }
             return aRet;
         }
 
+        /// <summary>
+        /// 获取Jason数据
+        /// </summary>
+        /// <param name="sUrl"></param>
+        /// <returns></returns>
+        private static JObject GetVideoJson(string sUrl)
+        {
+            string sPageSource = NetHelper.DownloadString(sUrl, 5000);
+            if (sPageSource == null)
+                return null;
+
+            if (sPageSource.Contains("<div id=\"watch-player-unavailable\">"))
+                return null;
+
+            var sRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+            string sJson = sRegex.Match(sPageSource).Result("$1");
+            return JObject.Parse(sJson);
+        }
+
+        /// <summary>
+        /// 获取PlayerVersion（用于解析加密Signature）
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        private static string GetPlayerVersion(JObject json)
+        {
+            if (json == null)
+                return null;
+
+            var sRegex = new Regex(@"player-(.+?).js");
+            string sJson = json["assets"]["js"].ToString();
+            return sRegex.Match(sJson).Result("$1");
+        }
+
         #endregion
-
-
-
 
         /// <summary>
         /// 获取链接信息
@@ -536,14 +484,16 @@ namespace AIGS.Tool
         /// <returns></returns>
         public static VideoInfo Parse(string sUrl)
         {
-            sUrl = m_DebugUrl;
-
             ErrCode eErrCode                   = ErrCode.Success;
             VideoInfo aInfo                    = new VideoInfo();
             string sID                         = null;
             string sTitle                      = null;
             string sPhotoUrl                   = null;
             string sDuration                   = null;
+            string sPlayerVersion              = null;
+            string sFmtString                  = null;
+            string sStreamMapString            = null;
+            string sOperationString            = null;
             List<DownloadUrlInfo> pDownloadUrl = null;
 
             //获取ID
@@ -554,24 +504,32 @@ namespace AIGS.Tool
                 goto RETURN;
             }
 
-            //Test
-            JObject Jason =  LoadJson(sUrl);
-            string htmlPlayerVersion = GetHtml5PlayerVersion(Jason);
-
-
-            //从网上下载信息
-            string sString = NetHelper.DownloadString(m_PreGetInfo + sID, 1000);
-            if (String.IsNullOrWhiteSpace(sString))
+            //获取页面Jason数据
+            JObject aJason = GetVideoJson(sUrl);
+            if(aJason == null)
             {
-                eErrCode = ErrCode.GetVideoInfoErr;
+                eErrCode = ErrCode.GetVideJasonErr;
                 goto RETURN;
             }
 
-            //获取标题\图片Url\时长\下载链接
-            sTitle       = GetStringPara(sString, "Title");
-            sPhotoUrl    = GetStringPara(sString, "PhotoUrl");
-            sDuration    = GetStringPara(sString, "Duration");
-            pDownloadUrl = GetDownloadUrlInfo(sString, htmlPlayerVersion);
+            //获取数据
+            sPlayerVersion   = GetPlayerVersion(aJason);
+            sTitle           = aJason["args"][H_FLAG_TITLE].ToString();
+            sPhotoUrl        = aJason["args"][H_FLAG_PHOTOURL].ToString();
+            sDuration        = aJason["args"][H_FLAG_DURATION].ToString();
+            sFmtString       = aJason["args"][H_FLAG_FMTLIST].ToString();
+            sStreamMapString = aJason["args"][H_FLAG_STREAM_MAP].ToString() + ',' + aJason["args"][H_FLAG_ADAPTIVE_FMT].ToString();
+
+            //通过sPlayerVersion获取解析串
+            sOperationString = Decipherer.DecipherWithVersion(sPlayerVersion);
+            if(sOperationString == null)
+            {
+                eErrCode = ErrCode.GetOperationErr;
+                goto RETURN;
+            }
+
+            //获取下载信息
+            pDownloadUrl     = GetDownloadUrlInfo(sStreamMapString, sFmtString, sOperationString);
 
         RETURN:
             aInfo.ID           = sID;
@@ -583,43 +541,6 @@ namespace AIGS.Tool
             aInfo.DownloadUrls = pDownloadUrl;
             return aInfo;
         }
-
-        #region Tets
-        private static bool IsVideoUnavailable(string pageSource)
-        {
-            const string unavailableContainer = "<div id=\"watch-player-unavailable\">";
-
-            return pageSource.Contains(unavailableContainer);
-        }
-
-        private static string GetHtml5PlayerVersion(JObject json)
-        {
-            var regex = new Regex(@"player-(.+?).js");
-
-            string js = json["assets"]["js"].ToString();
-
-            return regex.Match(js).Result("$1");
-        }
-
-        private static JObject LoadJson(string url)
-        {
-            string pageSource = NetHelper.DownloadString(url, 5000); 
-
-            if (IsVideoUnavailable(pageSource))
-            {
-                return null;
-            }
-
-            var dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
-
-            string extractedJson = dataRegex.Match(pageSource).Result("$1");
-
-            return JObject.Parse(extractedJson);
-        }
-
-        #endregion
-
-
     }
 
 }
