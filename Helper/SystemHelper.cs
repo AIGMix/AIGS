@@ -268,6 +268,47 @@ namespace AIGS.Helper
 
         #endregion
 
+        #region 剪贴板操作
+
+        /// <summary>
+        /// 设置剪贴板内容
+        /// </summary>
+        /// <param name="aData"></param>
+        /// <returns></returns>
+        public static void SetClipBoardData(object aData)
+        {
+            Clipboard.SetDataObject(aData, true);
+        }
+
+        /// <summary>
+        /// 剪贴板是否为空
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsClipBoardEmpty()
+        {
+            if (Clipboard.GetDataObject().GetFormats().Length == 0)
+                return true;
+            return false;
+        }
+
+        /// <summary>
+        /// 获取剪贴板内容
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T GetClipBoardData<T>()
+        {
+            if (IsClipBoardEmpty())
+                return default(T);
+
+            IDataObject oData = Clipboard.GetDataObject();
+            if (oData.GetDataPresent(typeof(T)))
+                return (T)oData.GetData(typeof(T));
+
+            return default(T);
+        }
+
+        #endregion
 
         /// <summary>
         /// 设置开机启动项

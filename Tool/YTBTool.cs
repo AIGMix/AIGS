@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AIGS.Helper;
+using AIGS.Common;
 using System.IO;
 using System.Web;
 using System.Collections.Specialized;
 using System.Collections;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace AIGS.Tool
 {
+    #region Signature解析
     internal static class Decipherer
     {
         public static string DecipherWithOperations(string cipher, string operations)
@@ -143,8 +148,243 @@ namespace AIGS.Tool
             return builder.ToString();
         }
     }
+    #endregion
 
+    #region 枚举量
+    public enum YTBErrCode
+    {
+        Success,
+        UrlErr,
+        GetVideoInfoErr,
+        GetVideJasonErr,
+        GetOperationErr,
+    }
 
+    public enum YTBExtension
+    {
+        eWebm,
+        eMp4,
+        eM4a,
+        e3gpp
+    }
+
+    public enum YTBType
+    {
+        VideoAudio,
+        VideoOnly,
+        AudioOnly,
+    }
+    #endregion
+
+    #region 数据类
+    public class YTBDownloadUrlInfo : ViewMoudleBase
+    {
+        private int          _iTag;
+        private int          _BitRate;
+        private int          _Fps;
+        private int          _Size;
+        private string       _SizeString;
+        private string       _Url;
+        private string       _Quality;
+        private string       _Resolution;
+        private string       _Codecs;
+        private YTBType      _Type;
+        private YTBExtension _Extension;
+        public int iTag                     //iTag值(Format Code)
+        {
+            get { return _iTag; }
+            set
+            {
+                if (value == _iTag) return;
+                _iTag = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Url                   //下载链接
+        {
+            get { return _Url; }
+            set
+            {
+                if (value == _Url) return;
+                _Url = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Quality               //品质
+        {
+            get { return _Quality; }
+            set
+            {
+                if (value == _Quality) return;
+                _Quality = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Codecs                //编码器
+        {
+            get { return _Codecs; }
+            set
+            {
+                if (value == _Codecs) return;
+                _Codecs = value;
+                OnPropertyChanged();
+            }
+        }
+        public int Size                     //大小（Byte）
+        {
+            get { return _Size; }
+            set
+            {
+                if (value == _Size) return;
+                _Size = value;
+                OnPropertyChanged();
+            }
+        }
+        public string SizeString            //大小（字符串）
+        {
+            get { return _SizeString; }
+            set
+            {
+                if (value == _SizeString) return;
+                _SizeString = value;
+                OnPropertyChanged();
+            }
+        }
+        public int BitRate                  //比特率
+        {
+            get { return _BitRate; }
+            set
+            {
+                if (value == _BitRate) return;
+                _BitRate = value;
+                OnPropertyChanged();
+            }
+        }
+        public int Fps                      //帧数
+        {
+            get { return _Fps; }
+            set
+            {
+                if (value == _Fps) return;
+                _Fps = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Resolution            //分辨率
+        {
+            get { return _Resolution; }
+            set
+            {
+                if (value == _Resolution) return;
+                _Resolution = value;
+                OnPropertyChanged();
+            }
+        }
+        public YTBType Type                 //类型
+        {
+            get { return _Type; }
+            set
+            {
+                if (value == _Type) return;
+                _Type = value;
+                OnPropertyChanged();
+            }
+        }
+        public YTBExtension Extension       //扩展名
+        {
+            get { return _Extension; }
+            set
+            {
+                if (value == _Extension) return;
+                _Extension = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public class YTBVideoInfo : ViewMoudleBase
+    {
+        private string _Url;
+        private string _ID;
+        private string _Title;
+        private string _Duration;
+        private string _PhotoUrl;
+        private YTBErrCode _ErrCode;
+        private List<YTBDownloadUrlInfo> _DownloadUrls;
+
+        public string Url                                   //原视频链接
+        {
+            get { return _Url; }
+            set
+            {
+                if (value == _Url) return;
+                _Url = value;
+                OnPropertyChanged();
+            }
+        }
+        public string ID                                    //原视频ID
+        {
+            get { return _Url; }
+            set
+            {
+                if (value == _Url) return;
+                _Url = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Title                                 //标题
+        {
+            get { return _Title; }
+            set
+            {
+                if (value == _Title) return;
+                _Title = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Duration                              //时长（秒）
+        {
+            get { return _Duration; }
+            set
+            {
+                if (value == _Duration) return;
+                _Duration = value;
+                OnPropertyChanged();
+            }
+        }
+        public string PhotoUrl                              //图片Url
+        {
+            get { return _PhotoUrl; }
+            set
+            {
+                if (value == _PhotoUrl) return;
+                _PhotoUrl = value;
+                OnPropertyChanged();
+            }
+        }
+        public YTBErrCode ErrCode                           //错误码
+        {
+            get { return _ErrCode; }
+            set
+            {
+                if (value == _ErrCode) return;
+                _ErrCode = value;
+                OnPropertyChanged();
+            }
+        }
+        public List<YTBDownloadUrlInfo> DownloadUrls        //下载Url
+        {
+            get { return _DownloadUrls; }
+            set
+            {
+                if (value == _DownloadUrls) return;
+                _DownloadUrls = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    #endregion
 
     public class YTBTool
     {
@@ -175,59 +415,6 @@ namespace AIGS.Tool
         static string H_FLAG_FPS             = "fps";
         static string H_FLAG_RESOLUTION      = "size";
         static string H_FLAG_RATE_BY_PASEE   = "ratebypass";
-
-        #endregion
-
-        #region 枚举与结构体
-
-        public enum ErrCode
-        {
-            Success,
-            UrlErr,             
-            GetVideoInfoErr,    
-            GetVideJasonErr,
-            GetOperationErr,
-        }
-
-        public enum Extension
-        {
-            eWebm,
-            eMp4,
-            eM4a,
-            e3gpp
-        }
-
-        public enum Type
-        {
-            VideoAudio,
-            VideoOnly,
-            AudioOnly,
-        }
-
-        public struct DownloadUrlInfo
-        {
-            public int iTag;                                   //iTag值(Format Code)
-            public string Url;                                 //下载链接
-            public string Quality;                             //品质
-            public string Codecs;                              //编码器 
-            public int Size;                                   //大小（Byte）
-            public int BitRate;                                //比特率
-            public int Fps;                                    //帧数
-            public string Resolution;                          //分辨率
-            public Type Type;                                  //类型
-            public Extension Extension;                        //扩展名
-        }
-
-        public struct VideoInfo
-        {
-            public string Url;                                 //原视频链接
-            public string ID;                                  //原视频ID
-            public string Title;                               //标题
-            public string Duration;                            //时长（秒）
-            public string PhotoUrl;                            //图片Url
-            public List<DownloadUrlInfo> DownloadUrls;         //下载Url
-            public ErrCode ErrCode;                            //错误码
-        }
 
         #endregion
 
@@ -304,23 +491,23 @@ namespace AIGS.Tool
         /// </summary>
         /// <param name="sTypeString"></param>
         /// <returns></returns>
-        static Extension GetExtension(string sTypeString)
+        static YTBExtension GetExtension(string sTypeString)
         {
             //video/mp4; codecs="avc1.42001E, mp4a.40.2"
-            Extension eRet   = Extension.eWebm;
+            YTBExtension eRet = YTBExtension.eWebm;
             string[] sArray  = sTypeString.Split(';');
             string[] sArray2 = sArray[0].Split('/');
 
             if (sArray2[1] == "mp4")
             {
-                eRet = Extension.eMp4;
+                eRet = YTBExtension.eMp4;
                 if(sArray2[0] == "audio")
-                    eRet = Extension.eM4a;
+                    eRet = YTBExtension.eM4a;
             }
             if (sArray2[1] == "3gpp")
-                eRet = Extension.e3gpp;
+                eRet = YTBExtension.e3gpp;
             if (sArray2[1] == "webm")
-                eRet = Extension.eWebm;
+                eRet = YTBExtension.eWebm;
             return eRet;
         }
 
@@ -339,25 +526,43 @@ namespace AIGS.Tool
         }
 
         /// <summary>
+        /// 获取大小的字符串
+        /// </summary>
+        /// <param name="iSize"></param>
+        /// <returns></returns>
+        static string GetSizeString(int iSize)
+        {
+            int iTmp = iSize / 1024;
+            if (iTmp <= 0)
+                return iSize.ToString() + "b";
+
+            iTmp /= 1024;
+            if (iTmp <= 0)
+                return (iSize / 1024).ToString() + "kb";
+
+            return String.Format("{0:F}", (double)iSize / 1024 / 1024) + "mb";
+        }
+
+        /// <summary>
         /// 获取类型
         /// </summary>
         /// <param name="sTypeString"></param>
         /// <returns></returns>
-        static Type GetType(string sTypeString)
+        static YTBType GetType(string sTypeString)
         {
             string[] sArray = sTypeString.Split(';');
             string[] sArray2 = sArray[0].Split('/');
 
             if (sArray2[0] == "audio")
-                return Type.AudioOnly;
+                return YTBType.AudioOnly;
             else
             {
                 string sCodecs = GetCodecs(sTypeString);
                 if(sCodecs.IndexOf(',') >= 0)
-                    return Type.VideoAudio;
+                    return YTBType.VideoAudio;
             }
 
-            return Type.VideoOnly;
+            return YTBType.VideoOnly;
         }
 
         /// <summary>
@@ -391,9 +596,9 @@ namespace AIGS.Tool
         /// </summary>
         /// <param name="sString"></param>
         /// <returns></returns>
-        static List<DownloadUrlInfo> GetDownloadUrlInfo(string sStreamMap, string sFmtString, string sOperationString)
+        static List<YTBDownloadUrlInfo> GetDownloadUrlInfo(string sStreamMap, string sFmtString, string sOperationString)
         {
-            List<DownloadUrlInfo> aRet = new List<DownloadUrlInfo>();
+            List<YTBDownloadUrlInfo> aRet = new List<YTBDownloadUrlInfo>();
             Hashtable FmtListHash      = GetFmtList(sFmtString);
 
             //解析链接
@@ -423,7 +628,7 @@ namespace AIGS.Tool
                 string sUrl = GetRelUrl(sBuf, sOperationString);
 
                 //赋值
-                DownloadUrlInfo aInfo = new DownloadUrlInfo();
+                YTBDownloadUrlInfo aInfo = new YTBDownloadUrlInfo();
                 aInfo.Url             = sUrl;
                 aInfo.iTag            = Common.Convert.ConverStringToInt(iTag);
                 aInfo.Quality         = sQuality;
@@ -436,6 +641,7 @@ namespace AIGS.Tool
 
                 string sTmp           = aInfo.Url.Substring(aInfo.Url.IndexOf('?') + 1);
                 aInfo.Size            = Common.Convert.ConverStringToInt(GetStringPara(sTmp, H_FLAG_FILESIZE));
+                aInfo.SizeString      = GetSizeString(aInfo.Size);
                 aRet.Add(aInfo);
             }
             return aRet;
@@ -448,10 +654,12 @@ namespace AIGS.Tool
         /// <returns></returns>
         private static JObject GetVideoJson(string sUrl)
         {
-            string sPageSource = NetHelper.DownloadString(sUrl, 5000);
-            if (sPageSource == null)
-                return null;
+            //string sPageSource = NetHelper.DownloadString(sUrl, 5000);
+            //if (sPageSource.IsBlank())
+            //    return null;
 
+            //FileHelper.Write(sPageSource, true, "e:\\Text1.txt");
+            string sPageSource = FileHelper.Read("e:\\Text1.txt");
             if (sPageSource.Contains("<div id=\"watch-player-unavailable\">"))
                 return null;
 
@@ -477,15 +685,16 @@ namespace AIGS.Tool
 
         #endregion
 
+
         /// <summary>
         /// 获取链接信息
         /// </summary>
         /// <param name="sUrl"></param>
         /// <returns></returns>
-        public static VideoInfo Parse(string sUrl)
+        public static YTBVideoInfo Parse(string sUrl)
         {
-            ErrCode eErrCode                   = ErrCode.Success;
-            VideoInfo aInfo                    = new VideoInfo();
+            YTBErrCode eErrCode                = YTBErrCode.Success;
+            YTBVideoInfo aInfo                 = new YTBVideoInfo();
             string sID                         = null;
             string sTitle                      = null;
             string sPhotoUrl                   = null;
@@ -494,13 +703,13 @@ namespace AIGS.Tool
             string sFmtString                  = null;
             string sStreamMapString            = null;
             string sOperationString            = null;
-            List<DownloadUrlInfo> pDownloadUrl = null;
+            List<YTBDownloadUrlInfo> pDownloadUrl = null;
 
             //获取ID
             sID = GetVideoID(sUrl);
             if(String.IsNullOrWhiteSpace(sID))
             {
-                eErrCode = ErrCode.UrlErr;
+                eErrCode = YTBErrCode.UrlErr;
                 goto RETURN;
             }
 
@@ -508,7 +717,7 @@ namespace AIGS.Tool
             JObject aJason = GetVideoJson(sUrl);
             if(aJason == null)
             {
-                eErrCode = ErrCode.GetVideJasonErr;
+                eErrCode = YTBErrCode.GetVideJasonErr;
                 goto RETURN;
             }
 
@@ -521,10 +730,11 @@ namespace AIGS.Tool
             sStreamMapString = aJason["args"][H_FLAG_STREAM_MAP].ToString() + ',' + aJason["args"][H_FLAG_ADAPTIVE_FMT].ToString();
 
             //通过sPlayerVersion获取解析串
-            sOperationString = Decipherer.DecipherWithVersion(sPlayerVersion);
+            //sOperationString = Decipherer.DecipherWithVersion(sPlayerVersion);
+            sOperationString = "r s2 w35 s2 r w4 r";
             if(sOperationString == null)
             {
-                eErrCode = ErrCode.GetOperationErr;
+                eErrCode = YTBErrCode.GetOperationErr;
                 goto RETURN;
             }
 
@@ -541,6 +751,26 @@ namespace AIGS.Tool
             aInfo.DownloadUrls = pDownloadUrl;
             return aInfo;
         }
+
+
+        #region 动态参数
+
+        public bool IsParseOver;
+        public YTBVideoInfo aParseInfo;
+        void ThreadParse(object sUrl)
+        {
+            IsParseOver = false;
+            aParseInfo  = Parse(sUrl.ToString());           
+            IsParseOver = true;
+        }
+
+        public Thread StartParseThread(string sUrl)
+        {
+            Thread aThreadHandle = ThreadHelper.Start(ThreadParse, sUrl);
+            return aThreadHandle;
+        }
+
+        #endregion
     }
 
 }

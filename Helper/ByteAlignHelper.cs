@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace AIGS.Helper
 {
@@ -230,7 +231,7 @@ namespace AIGS.Helper
         /// <param name="sTotalValueName">总值的名称</param>
         /// <param name="sFieldName">字段名称</param>
         /// <returns></returns>
-        public static uint get(object aThis, string sFieldName)
+        public static uint get(object aThis, [CallerMemberName] string sFieldName = null)
         {
             int iOffset = -1;
             int iLength = -1;
@@ -253,7 +254,7 @@ namespace AIGS.Helper
         /// <param name="sTotalValueName">总值名称</param>
         /// <param name="sFieldName">字段名称</param>
         /// <returns></returns>
-        public static int set(uint iFieldValue, object aThis, string sFieldName)
+        public static int set(uint iFieldValue, object aThis, [CallerMemberName] string sFieldName = null)
         {
             int iOffset = -1;
             int iLength = -1;

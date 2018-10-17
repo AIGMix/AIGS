@@ -407,5 +407,51 @@ namespace AIGS.Common
         }
 
         #endregion
+
+        #region 类B赋值到类A
+        /// <summary>
+        /// 传入类型B的对象b，将b与a相同名称的值进行赋值给创建的a中
+        /// </summary>
+        /// <typeparam name="A">类型A</typeparam>
+        /// <typeparam name="B">类型B</typeparam>
+        /// <param name="b">类型为B的参数b</param>
+        /// <returns>拷贝b中相同属性的值的a</returns>
+        public static A ConverClassBToClassA<A, B>(B b)
+        {
+            A a = Activator.CreateInstance<A>();
+            ConverClassBToClassA<A, B>(b, ref a);
+            return a;
+        }
+
+        public static void ConverClassBToClassA<A, B>(B b, ref A a)
+        {
+            try
+            {
+                Type Typeb = b.GetType();//获得类型  
+                Type Typea = typeof(A);
+                PropertyInfo[] aPropertyA = Typea.GetProperties();
+                PropertyInfo[] aPropertyB = Typeb.GetProperties();
+                foreach (PropertyInfo sp in aPropertyB)//获得类型的属性字段  
+                {
+                    foreach (PropertyInfo ap in aPropertyA)
+                    {
+                        if (sp.CanRead == false || sp.CanWrite == false)
+                            continue;
+
+                        if (ap.Name == sp.Name)//判断属性名是否相同  
+                        {
+                            ap.SetValue(a, sp.GetValue(b, null), null);//获得b对象属性的值复制给a对象的属性  
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        #endregion
+
     }
 }
