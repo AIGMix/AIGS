@@ -73,6 +73,7 @@ namespace AIGS.Helper
             }
             return request.GetResponse() as HttpWebResponse;
         }  
+
     }
 
 

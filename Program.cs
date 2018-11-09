@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AIGS.Helper;
 using System.Reflection;
+using AIGS.Tools;
 namespace AIGS
 {
     class Program
@@ -12,7 +13,10 @@ namespace AIGS
         
         static void Main(string[] args)
         {
-            Tool.YTBTool.Parse(null);
+            AlbumInfo aAlbumInfo = new AlbumInfo();
+            AlbumDL.GetAlbumTracks(97697819);
+            AlbumDL.GetAlbumInfo(96146858, ref aAlbumInfo);
+            YTBTool.Parse(null);
 
 
 

@@ -111,6 +111,9 @@ namespace AIGS.Helper
             sPath = sPath.Replace(">", sReplaceChar);
             sPath = sPath.Replace("|", sReplaceChar);
             sPath = sPath.Replace("\\", sReplaceChar);
+            sPath = sPath.Replace("*", sReplaceChar);
+            sPath = sPath.Replace("\"", sReplaceChar);
+
             return sPath;
         }
 

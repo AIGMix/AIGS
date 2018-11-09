@@ -10,9 +10,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Web;
 
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 namespace AIGS.Helper
@@ -112,8 +110,10 @@ namespace AIGS.Helper
             /// <returns></returns>
             protected override WebRequest GetWebRequest(Uri address)
             {
-                var request = base.GetWebRequest(address);
+                HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
+                //var request = base.GetWebRequest(address);
                 request.Timeout = Timeout;
+                request.ReadWriteTimeout = Timeout;
                 return request;
             }
         }
@@ -223,9 +223,10 @@ namespace AIGS.Helper
                     aRet = aClient.DownloadData(sUrl);
                 }
             }
-            catch
+            catch (System.Net.WebException e)
             {
-                
+                aClient.Dispose();
+                return aRet;
             }
 
             aClient.Dispose();

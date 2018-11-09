@@ -57,7 +57,11 @@ namespace AIGS.Helper
             if (aFunc != null)
                 aFunc(aFuncPara);
 
-            m_ThreadSem.Release();
+            try
+            {
+                m_ThreadSem.Release();
+            }
+            catch { }
         }
 
         
