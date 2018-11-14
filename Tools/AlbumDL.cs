@@ -224,7 +224,6 @@ namespace AIGS.Tools
             GetAlbumCover,                      //专辑封面
             GetPlayListCover,                   //播放列表封面
             GetVideoCover,                      //MV封面
-
         }
         enum SearchType
         {
@@ -751,10 +750,6 @@ namespace AIGS.Tools
             Thread aThreadHandle = ThreadHelper.Start(ThreadGetAlbumInfo, sUrl);
             return aThreadHandle;
         }
-
-
-
-
 
         #endregion
 

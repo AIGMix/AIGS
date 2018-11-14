@@ -13,10 +13,14 @@ namespace AIGS
         
         static void Main(string[] args)
         {
-            AlbumInfo aAlbumInfo = new AlbumInfo();
-            AlbumDL.GetAlbumTracks(97697819);
-            AlbumDL.GetAlbumInfo(96146858, ref aAlbumInfo);
-            YTBTool.Parse(null);
+            Album aInfo = new Album();
+            TidalTool.GetAlbumInfo(96146858, ref aInfo);
+            TidalTool.GetAlbumTracks(97697819);
+
+            //AlbumInfo aAlbumInfo = new AlbumInfo();
+            //AlbumDL.GetAlbumTracks(97697819);
+            //AlbumDL.GetAlbumInfo(96146858, ref aAlbumInfo);
+            //YTBTool.Parse(null);
 
 
 
