@@ -9,21 +9,31 @@ namespace AIGS.Helper
     public class ThreadHelper
     {
         #region 静态接口
-        /// <summary>
-        /// 启动一条线程
-        /// </summary>
-        /// <param name="ThreadFunc">线程回调</param>
-        /// <param name="data">线程传参</param>
-        /// <returns></returns>
-        public static Thread Start(EventFunc ThreadFunc, object data = null)
+
+        public delegate void EventFunc2(object[] data);
+        private static void ThreadFuncInternal2(object data)
         {
-            Thread aNewThread = new Thread(new ParameterizedThreadStart(ThreadFunc));
-            aNewThread.Start(data);
-            
+            Common.Property aRecord = (Common.Property)data;
+            EventFunc2 Func         = (EventFunc2)aRecord.Key;
+            object[] para           = (object[])aRecord.Value;
+
+            Func(para);
+        }
+
+        public static Thread Start(EventFunc2 ThreadFunc, params object[] data)
+        {
+            Thread aNewThread       = new Thread(new ParameterizedThreadStart(ThreadFuncInternal2));
+            Common.Property aRecord = new Common.Property(ThreadFunc, data);
+
+            aNewThread.Start(aRecord);
             return aNewThread;
         }
 
         #endregion
+
+
+
+
 
 
         #region 动态接口
@@ -39,20 +49,13 @@ namespace AIGS.Helper
         private Semaphore m_ThreadSem;
 
         /// <summary>
-        /// 自定义线程处理函数
-        /// </summary>
-        /// <param name="data"></param>
-        public delegate void EventFunc(object data);
-
-        /// <summary>
         /// 线程处理前后的操作
         /// </summary>
         /// <param name="data"></param>
-        private void Thread_Func(object data)
+        private void ThreadFuncWait(object[] data)
         {
-            KeyValuePair<EventFunc, object> aRecord = (KeyValuePair<EventFunc, object>)data;
-            EventFunc aFunc = aRecord.Key;
-            object aFuncPara = aRecord.Value;
+            EventFunc2 aFunc   = (EventFunc2)data[0];
+            object[] aFuncPara = (object[])data[1];
 
             if (aFunc != null)
                 aFunc(aFuncPara);
@@ -80,6 +83,13 @@ namespace AIGS.Helper
             m_ThreadSem = new Semaphore(iTreadMaxNum, iTreadMaxNum);
         }
 
+        /// <summary>
+        /// 获取线程数
+        /// </summary>
+        public int GetCount()
+        {
+            return m_ThreadArrary.Count;
+        }
 
         /// <summary>
         /// 查看集合中是否有空闲线程
@@ -97,15 +107,13 @@ namespace AIGS.Helper
         /// <param name="ThreadFunc">线程回调</param>
         /// <param name="data">线程传参</param>
         /// <returns></returns>
-        public bool ThreadStart(EventFunc ThreadFunc, object data = null)
+        public bool ThreadStart(EventFunc2 ThreadFunc, params object[] data)
         {
             int iIndex = GetFreeIndex();
             if (iIndex < 0)
                 return false;
 
-            //启动线程
-            KeyValuePair<EventFunc, object> aRecord = new KeyValuePair<EventFunc, object>(ThreadFunc, data);
-            m_ThreadArrary[iIndex] = Start(Thread_Func, aRecord);
+            m_ThreadArrary[iIndex] = Start(ThreadFuncWait, ThreadFunc, data);
             return true;
         }
         
@@ -115,7 +123,7 @@ namespace AIGS.Helper
         /// <param name="ThreadFunc"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool ThreadStartWait(EventFunc ThreadFunc, object data = null, int iMillisecondsTimeout = 0)
+        public bool ThreadStartWait(EventFunc2 ThreadFunc, int iMillisecondsTimeout = 0, params object[] data)
         {
             //等待
             bool bFlag;
@@ -140,9 +148,19 @@ namespace AIGS.Helper
                 return false;
 
             //启动线程
-            KeyValuePair<EventFunc, object> aRecord = new KeyValuePair<EventFunc, object>(ThreadFunc, data);
-            m_ThreadArrary[iIndex] = Start(Thread_Func, aRecord);
+            m_ThreadArrary[iIndex] = Start(ThreadFuncWait, ThreadFunc, data);
             return true;
+        }
+
+        /// <summary>
+        /// 等待全部线程的结束
+        /// </summary>
+        public void WaitAll()
+        {
+            while(!IsAllFree())
+            {
+                Thread.Sleep(1000);
+            }
         }
 
         /// <summary>

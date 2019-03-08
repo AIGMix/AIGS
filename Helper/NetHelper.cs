@@ -179,7 +179,7 @@ namespace AIGS.Helper
         }
 
 
-        enum DOWNLOAD_TYPE
+        public enum DOWNLOAD_TYPE
         {
             DATA,
             STIRNG,
@@ -223,7 +223,7 @@ namespace AIGS.Helper
                     aRet = aClient.DownloadData(sUrl);
                 }
             }
-            catch (System.Net.WebException e)
+            catch
             {
                 aClient.Dispose();
                 return aRet;
@@ -241,7 +241,7 @@ namespace AIGS.Helper
         /// <param name="sFilePathNameOrData"></param>
         /// <param name="iTimeOut"></param>
         /// <returns></returns>
-        private static object Upload(DOWNLOAD_TYPE eType, string sUrl, string sFilePathNameOrData, int iTimeOut)
+        public static object Upload(DOWNLOAD_TYPE eType, string sUrl, string sFilePathNameOrData, int iTimeOut)
         {
             if (String.IsNullOrWhiteSpace(sFilePathNameOrData))
                 return null;

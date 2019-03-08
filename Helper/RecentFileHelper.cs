@@ -25,7 +25,6 @@ namespace AIGS.Helper
         private const string SIGN_GROUP = "RECENT_FILES";
         #endregion
 
-
         /// <summary>
         /// 获取最近打开的文件的全部路径
         /// </summary>
@@ -41,7 +40,7 @@ namespace AIGS.Helper
             List<string> pList = new List<string>();
             for (int i = 0; i < iNum; i++)
             {
-                string sPath = ConfigHelper.GetValue(SIGN_FILE + i, SIGN_GROUP, sConfigPath);
+                string sPath = ConfigHelper.GetValue(SIGN_FILE + i, null, SIGN_GROUP, sConfigPath);
                 if (String.IsNullOrWhiteSpace(sPath))
                     continue;
 

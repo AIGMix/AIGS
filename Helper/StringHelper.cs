@@ -9,6 +9,56 @@ namespace AIGS.Helper
     public class StringHelper
     {
         /// <summary>
+        /// 是否为纯中文
+        /// </summary>
+        /// <param name="sStr"></param>
+        /// <returns></returns>
+        public static bool IsChinese(string sStr)
+        {
+            //在 ASCII码表中，英文的范围是0-127，而汉字则是大于127
+            string text = sStr;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if ((int)text[i] <= 127)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 是否为纯英文
+        /// </summary>
+        /// <param name="sStr"></param>
+        /// <returns></returns>
+        public static bool IsEnglisth(string sStr)
+        {
+            string text = sStr;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if ((int)text[i] > 127)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 是否为数字
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsNumeric(string str)
+        {
+            char[] ch = new char[str.Length];
+            ch = str.ToCharArray();
+            for (int i = 0; i < ch.Count(); i++)
+            {
+                if (ch[i] < 48 || ch[i] > 57)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// 将多个数组组合到一起
         /// </summary>
         /// <param name="sArrary">数组集合</param>
@@ -106,31 +156,66 @@ namespace AIGS.Helper
         /// <param name="EndChar">寻找的结束符号</param>
         public static string GetSubString(string sMsg, string FindStr, string EndChar)
         {
-            string formt = FindStr + "(.*)";
-            if (!string.IsNullOrWhiteSpace(EndChar))
-                formt = FindStr + "(.*?)" + EndChar;
-
-            Regex reg = new Regex(formt);
-            Match aTmp = reg.Match(sMsg);
-            if (string.IsNullOrWhiteSpace(aTmp.Value))
-            {
-                if (!string.IsNullOrWhiteSpace(EndChar))
-                    return GetSubString(sMsg, FindStr, null);
+            if (string.IsNullOrEmpty(sMsg))
                 return null;
+            if (string.IsNullOrEmpty(FindStr) && string.IsNullOrEmpty(EndChar))
+                return sMsg;
+
+            if(string.IsNullOrEmpty(FindStr))
+            {
+                int iEndIdx = sMsg.IndexOf(EndChar);
+                if (iEndIdx < 0)
+                    return null;
+
+                return sMsg.Substring(0, iEndIdx);
             }
+            else if (string.IsNullOrEmpty(EndChar))
+            {
+                int iFindIdx = sMsg.IndexOf(FindStr);
+                if (iFindIdx < 0)
+                    return null;
 
-            string sText = aTmp.Value;
-            int iLen = sText.Length - FindStr.Length;
-            iLen -= string.IsNullOrWhiteSpace(EndChar) ? 0 : EndChar.Length;
-            sText = sText.Substring(FindStr.Length, iLen);
+                return sMsg.Substring(iFindIdx + FindStr.Length);
+            }
+            else
+            {
+                int iFindIdx = sMsg.IndexOf(FindStr);
+                if (iFindIdx < 0)
+                    return null;
 
-            return sText;
+                int iEndIdx = sMsg.IndexOf(EndChar, iFindIdx + FindStr.Length);
+                if (iFindIdx < 0)
+                    return null;
+
+                return sMsg.Substring(iFindIdx + FindStr.Length, iEndIdx - iFindIdx - FindStr.Length);
+            }
         }
 
+        /// <summary>
+        /// 计算子串数量
+        /// </summary>
+        /// <param name="sStr"></param>
+        /// <param name="sSubStr"></param>
+        /// <returns></returns>
+        public static int CountSubString(string sStr, string sSubStr)
+        {
+            int iCount  = 0;
+            string sTmp = sStr;
+            while(true)
+            {
+                int iIndex = sTmp.IndexOf(sSubStr);
+                if (iIndex < 0)
+                    break;
 
+                iCount++;
+                sTmp = sTmp.Substring(iIndex + sSubStr.Length);
+                if (string.IsNullOrEmpty(sTmp))
+                    break;
+            }
 
+            return iCount;
+        }
 
-        #region 删除重复字符
         /// <summary>
         /// 删除相邻的重复字符
         /// </summary>
@@ -179,6 +264,5 @@ namespace AIGS.Helper
 
             return sRet;
         }
-        #endregion
     }
 }

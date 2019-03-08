@@ -65,6 +65,30 @@ namespace AIGS.Helper
         }
 
         /// <summary>
+        /// 获取当前日子，如1993-02-28
+        /// </summary>
+        /// <param name="Interval">间隔符号</param>
+        /// <param name="PadZero">是否补零</param>
+        /// <returns></returns>
+        public static string GetTodayString(string Interval = "-", bool PadZero = true)
+        {
+            System.DateTime aTime = GetCurrentTime();
+            int year  = aTime.Year;
+            int month = aTime.Month;
+            int day   = aTime.Day;
+
+            string sRet = year.ToString() + Interval;
+            if (month < 10 && PadZero)
+                sRet += "0";
+            sRet += month.ToString() + Interval;
+            if (day < 10 && PadZero)
+                sRet += "0";
+            sRet += day.ToString();
+
+            return sRet;
+        }
+
+        /// <summary>
         /// 获取时间消耗（毫秒）
         /// </summary>
         /// <param name="aStartTime"></param>

@@ -16,8 +16,6 @@ using System.Runtime.InteropServices;
 
 namespace AIGS.Common
 {
-
-
     /// <summary>
     /// C++的结构体转C#结构体
     /// </summary>

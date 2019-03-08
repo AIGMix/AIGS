@@ -36,7 +36,7 @@ namespace AIGS.Helper
         /// <param name="filePath">文件地址</param>
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
-
+        
         /// <summary>
         /// 从配置文件中读出
         /// </summary>

@@ -11,6 +11,8 @@ namespace AIGS.Helper
 {
     public class JsonHelper
     {
+        public static string Errmsg;
+
         /// <summary>
         /// 字符串转结构体
         /// </summary>
@@ -37,8 +39,9 @@ namespace AIGS.Helper
                 T pRet = JsonConvert.DeserializeObject<T>(sStr);
                 return pRet;
             }
-            catch
+            catch(Exception e)
             {
+                Errmsg = e.Message;
                 return default(T);
             }
         }

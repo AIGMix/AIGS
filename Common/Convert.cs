@@ -9,11 +9,13 @@ using System.IO;
 using System.Reflection;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Data;
 
 namespace AIGS.Common
 {
     public class Convert
     {
+        
         #region IntPtr与其他类型的转换
 
         #region struct<->IntPtr
@@ -272,6 +274,18 @@ namespace AIGS.Common
         }
 
         /// <summary>
+        /// INT转枚举
+        /// </summary>
+        /// <param name="iEnum"></param>
+        /// <param name="enumType"></param>
+        /// <returns></returns>
+        public static object ConverIntToEnum(int iEnum, Type enumType)
+        {
+            string sName = Enum.GetName(enumType, iEnum);
+            return Enum.Parse(enumType, sName);
+        }
+
+        /// <summary>
         /// 枚举转字符串
         /// </summary>
         /// <param name="iEnum"></param>
@@ -289,7 +303,7 @@ namespace AIGS.Common
 
             if (iDefaultEnum == -1 || aList.Length <= iDefaultEnum)
                 return "";
-
+           
             return Enum.GetName(enumType, iDefaultEnum);
         }   
 
@@ -348,6 +362,9 @@ namespace AIGS.Common
         /// <returns></returns>
         public static BitmapImage ConverByteArrayToBitmapImage(byte[] sByteArray)
         {
+            if (sByteArray == null)
+                return null;
+
             BitmapImage bmp = null;
             try
             {
@@ -453,5 +470,77 @@ namespace AIGS.Common
 
         #endregion
 
+        #region 克隆
+        /// <summary>
+        /// 克隆一个对象
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public static object CloneObject(object o)
+        {
+            Type t = o.GetType();
+            PropertyInfo[] properties = t.GetProperties();
+            Object p = t.InvokeMember("", System.Reflection.BindingFlags.CreateInstance, null, o, null);
+            foreach (PropertyInfo pi in properties)
+            {
+                if (pi.CanWrite)
+                {
+                    object value = pi.GetValue(o, null);
+                    pi.SetValue(p, value, null);
+                }
+            }
+            return p;
+        }
+        #endregion
+    }
+
+    public class EnumToBoolConverter : IValueConverter
+    {
+        public Type EnumType = null;
+
+        /// <summary>
+        /// 根据绑定值 与 Radio按钮设定的值 是否相等，判断是否返回TRUE
+        /// </summary>
+        /// <param name="value">绑定值</param>
+        /// <param name="parameter">Radio按钮设定的值</param>
+        /// <returns>BOOL</returns>
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            //保存枚举的类型，以便后面可以用
+            if (EnumType == null)
+                EnumType = value.GetType();
+
+            try
+            {
+                int iRadioPara = int.Parse(parameter.ToString());
+                return iRadioPara == (int)value;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 根据 Radio按钮设定的值 来设置绑定值
+        /// </summary>
+        /// <param name="value">如果为true则有效</param>
+        /// <param name="parameter">Radio按钮设定的值</param>
+        /// <returns>枚举量</returns>
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool isChecked = (bool)value;
+            if (!isChecked)
+                return null;
+
+            try
+            {
+                return AIGS.Common.Convert.ConverIntToEnum(int.Parse(parameter.ToString()), EnumType);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

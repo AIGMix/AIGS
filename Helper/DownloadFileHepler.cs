@@ -1,79 +1,164 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AIGS.Helper;
 using System.Net;
+using System.IO;
+using System.Windows;
 
 namespace AIGS.Helper
 {
     public class DownloadFileHepler
     {
-        int m_ThreadNum;
-        ThreadHelper m_Thread;
-        public DownloadFileHepler(int iThreadNum = 1)
+        /// <summary>
+        /// 获取文件大小
+        /// </summary>
+        public static long GetFileLength(string url)
         {
-            m_ThreadNum = iThreadNum < 1 ? 1 : iThreadNum;
-            m_Thread    = new ThreadHelper(m_ThreadNum);
-        }
-
-        public int Start(string sUrl, string sSavePath)
-        {
-            if (String.IsNullOrWhiteSpace(sUrl) || String.IsNullOrWhiteSpace(sSavePath))
-                return -1;
-
             try
             {
-                HttpWebRequest aRequest = (HttpWebRequest)WebRequest.Create(sUrl);
-                HttpWebResponse aResponse = (HttpWebResponse)aRequest.GetResponse();
-                long lFileSize = aResponse.ContentLength;
-
-                int iSingelNum = (int)(lFileSize / m_ThreadNum);  //平均分配
-                int remainder = (int)(lFileSize % m_ThreadNum);   //获取剩余的
+                return (long)Start(url, null, bOnlyGetSize: true, Timeout:3000, RetryNum:3, UserAgent:null, ContentType:null);
+            }
+            catch
+            {
 
             }
-            catch { return -1; }
-
             return 0;
         }
 
 
+        /// <summary>
+        /// 进度更新响应
+        /// </summary>
+        /// <param name="lTotalSize">文件大小</param>
+        /// <param name="lAlreadyDownloadSize">已下载的大小</param>
+        /// <param name="lIncreSize">增量下载的大小</param>
+        /// <param name="data">中间传递的数据</param>
+        public delegate void UpdateDownloadNotify(long lTotalSize, long lAlreadyDownloadSize, long lIncreSize, object data);
+        /// <summary>
+        /// 完成下载
+        /// </summary>
+        /// <param name="lTotalSize">文件大小</param>
+        /// <param name="data">中间传递的数据</param>
+        public delegate void CompleteDownloadNotify(long lTotalSize, object data);
+        /// <summary>
+        /// 错误情况
+        /// </summary>
+        /// <param name="lTotalSize">文件大小</param>
+        /// <param name="lAlreadyDownloadSize">已下载的大小</param>
+        /// <param name="sErrMsg">错误信息</param>
+        /// <param name="data">中间传递的数据</param>
+        public delegate void ErrDownloadNotify(long lTotalSize, long lAlreadyDownloadSize, string sErrMsg, object data);
 
-
-        private static readonly string DefaultUserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
-        /// <summary>  
-        /// 创建GET方式的HTTP请求  
-        /// </summary>  
-        /// <param name="url">请求的URL</param>  
-        /// <param name="timeout">请求的超时时间</param>  
-        /// <param name="userAgent">请求的客户端浏览器信息，可以为空</param>  
-        /// <param name="cookies">随同HTTP请求发送的Cookie信息，如果不需要身份验证可以为空</param>  
-        /// <returns></returns>  
-        public static HttpWebResponse CreateGetHttpResponse(string url, int? timeout, string userAgent, CookieCollection cookies)
+        /// <summary>
+        /// 启动下载
+        /// </summary>
+        /// <param name="sUrl">下载链接</param>
+        /// <param name="sPath">路径文件名</param>
+        /// <param name="aThis">窗口句柄</param>
+        /// <param name="data">中间传递的数据</param>
+        /// <param name="UpdateFunc">进度更新</param>
+        /// <param name="CompleteFunc">下载结束</param>
+        /// <param name="ErrFunc">错误</param>
+        /// <param name="Timeout">超时</param>
+        /// <param name="UserAgent"></param>
+        /// <param name="ContentType"></param>
+        public static object Start(string sUrl,
+                                  string sPath,
+                                  Window aThis                        = null,
+                                  object data                         = null,
+                                  UpdateDownloadNotify UpdateFunc     = null,
+                                  CompleteDownloadNotify CompleteFunc = null,
+                                  ErrDownloadNotify ErrFunc           = null,
+                                  int RetryNum                        = 0,
+                                  int Timeout                         = 5 * 1000,
+                                  string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
+                                  string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
+                                  bool bOnlyGetSize                   = false)
         {
-            if (string.IsNullOrEmpty(url))
-            {
-                throw new ArgumentNullException("url");
-            }
-            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
-            request.Method = "GET";
-            request.UserAgent = DefaultUserAgent;
-            if (!string.IsNullOrEmpty(userAgent))
-            {
-                request.UserAgent = userAgent;
-            }
-            if (timeout.HasValue)
-            {
-                request.Timeout = timeout.Value;
-            }
-            if (cookies != null)
-            {
-                request.CookieContainer = new CookieContainer();
-                request.CookieContainer.Add(cookies);
-            }
-            return request.GetResponse() as HttpWebResponse;
-        }  
+            UpdateDownloadNotify UpdateMothed     = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
+            CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
+            ErrDownloadNotify ErrMothed           = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
+            long lAlreadyDownloadSize             = 0;
+            long lTotalSize                       = 0;
+            long lIncreSize                       = 0;
 
+            if (RetryNum > 50)
+                RetryNum = 50;
+
+            RETRY_ENTRY:
+            try
+            {
+                ServicePointManager.Expect100Continue = false;
+
+                HttpWebRequest request    = (HttpWebRequest)WebRequest.Create(sUrl);
+                request.Method            = "GET";
+                request.ContentType       = ContentType;
+                request.Timeout           = Timeout;
+                //request.KeepAlive       = true;
+                request.UserAgent         = UserAgent;
+
+                //开始请求
+                HttpWebResponse response  = (HttpWebResponse)request.GetResponse();
+                lTotalSize = response.ContentLength;
+                if (bOnlyGetSize)
+                    return lTotalSize;
+
+                Stream myResponseStream   = response.GetResponseStream();
+                System.IO.Stream pFD      = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
+
+                //如果走到这里的话，就不能重试了，要不如进度会出错
+                RetryNum = 0;
+
+                byte[] buf = new byte[1024];
+                int size   = 0;
+                while ((size = myResponseStream.Read(buf, 0, (int)buf.Length)) > 0)
+                {
+                    lIncreSize = size;
+                    lAlreadyDownloadSize += size;
+                    pFD.Write(buf, 0, size);
+                    if (UpdateFunc != null)
+                    {
+                        if (aThis != null)
+                            aThis.Dispatcher.Invoke(UpdateMothed, lTotalSize, lAlreadyDownloadSize, lIncreSize, data);
+                        else
+                            UpdateMothed(lTotalSize, lAlreadyDownloadSize, lIncreSize, data);
+                    }
+                }
+                pFD.Close();
+                myResponseStream.Close();
+                if (CompleteMothed != null)
+                {
+                    if (aThis != null)
+                        aThis.Dispatcher.Invoke(CompleteMothed, lTotalSize, data);
+                    else
+                        CompleteMothed(lTotalSize, data);
+                }
+
+                return true;
+            }
+            catch(System.Exception e)
+            {
+                if(RetryNum > 0)
+                {
+                    RetryNum--;
+                    goto RETRY_ENTRY;
+                }
+
+                if (ErrMothed != null)
+                {
+                    if (aThis != null)
+                        aThis.Dispatcher.Invoke(ErrMothed, lTotalSize, lAlreadyDownloadSize, e.Message, data);
+                    else
+                        ErrMothed(lTotalSize, lAlreadyDownloadSize, e.Message, data);
+                }
+                if (bOnlyGetSize)
+                    return 0;
+                return false;
+            }
+        }
     }
 
 
