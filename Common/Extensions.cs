@@ -9,7 +9,7 @@ using System.Web;
 
 namespace AIGS.Common
 {
-    internal static class Extensions
+    public static class Extensions
     {
         /// <summary>
         /// 是否空白

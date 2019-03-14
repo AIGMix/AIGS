@@ -28,6 +28,18 @@ namespace AIGS.Helper
             return 0;
         }
 
+        /// <summary>
+        /// 获取全部文件的大小
+        /// </summary>
+        public static long GetAllFileLength(string[] urls)
+        {
+            long lLength = 0;
+            foreach (string item in urls)
+            {
+                lLength += GetFileLength(item);
+            }
+            return lLength;
+        }
 
         /// <summary>
         /// 进度更新响应

@@ -11,12 +11,35 @@ namespace AIGS
     {
         static void Main(string[] args)
         {
-            DownloadFileHepler.GetFileLength("http://144.34.241.208/test/aigpy.exe");
-            DownloadFileHepler.Start("http://144.34.241.208/test/aigpy.exe", "e:\\a.exe", null);
+            
             //Tidal.Account Account = new Tidal.Account();
             //Account.LogIn("masterhd1901@qq.com", "bitchjolin");
-
             //Tidal.TidalTool.User = Account;
+            //Tidal.Video v = Tidal.TidalTool.GetVideo("45219814");
+            //Dictionary<string, string> pResolist = Tidal.TidalTool.GetVideoResolutionList("45219814");
+
+            //List<string> pList = Tidal.TidalTool.GetVideoM3u8FileUrlList(pResolist.ElementAt(2).Value);
+            //List<string> pFiles = new List<string>();
+            //for (int i = 0; i < pList.Count(); i++)
+            //{
+            //    string sPath = "e:\\7\\test\\" + i + ".mp4";
+            //    bool bCheck  = (bool)DownloadFileHepler.Start(pList[i], sPath, ContentType:null, UserAgent:null);
+            //    if (bCheck == false)
+            //        i = i;
+            //    pFiles.Add(sPath);
+            //}
+            //FFmpegHelper.MergerByFiles(pFiles.ToArray(), "E:\\7\\TAGET.mp4");
+
+            List<string> pFiles = new List<string>();
+            for (int i = 0; i < 42; i++)
+            {
+                string sPath = "e:\\7\\test\\" + i + ".mp4";
+                pFiles.Add(sPath);
+            }
+            FFmpegHelper.MergerByFiles(pFiles.ToArray(), "E:\\7\\TAGET.mp4");
+
+
+            
             //Tidal.TidalTool.GetAlbum("100270475");
             //Tidal.TidalTool.GetAlbumTracks("100270475");
             //Tidal.TidalTool.GetStreamUrl("100270477","LOSSLESS");

@@ -187,6 +187,8 @@ namespace AIGS.Helper
                 if (iFindIdx < 0)
                     return null;
 
+                if (iEndIdx < 0)
+                    return sMsg.Substring(iFindIdx + FindStr.Length);
                 return sMsg.Substring(iFindIdx + FindStr.Length, iEndIdx - iFindIdx - FindStr.Length);
             }
         }
