@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Status.cs" />
+    <Compile Include="Control\PasswordBoxHelper.cs" />
     <Compile Include="Helper\EncryptHelper.cs" />
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\DllSample.cs" />
@@ -218,16 +219,6 @@
     <Compile Include="Helper\XmlHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tidal\Account.cs" />
-    <Compile Include="Tidal\Album.cs" />
-    <Compile Include="Tidal\Artist.cs" />
-    <Compile Include="Tidal\Enum.cs" />
-    <Compile Include="Tidal\Playlist.cs" />
-    <Compile Include="Tidal\StreamUrl.cs" />
-    <Compile Include="Tidal\TidalTool.cs" />
-    <Compile Include="Tidal\Tool.cs" />
-    <Compile Include="Tidal\Track.cs" />
-    <Compile Include="Tidal\Video.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

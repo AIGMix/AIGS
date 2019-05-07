@@ -32,6 +32,31 @@ namespace AIGS.Helper
             }
         }
 
+        public static bool Write(byte[] sContent, bool IsClearBeforeWrite, string sFilePath)
+        {
+            if (sFilePath.IsBlank())
+                return false;
+            try
+            {
+                //创建目录
+                var di = new DirectoryInfo(Path.GetDirectoryName(sFilePath));
+                if (!di.Exists)
+                    di.Create();
+
+                FileStream FD = new FileStream(sFilePath, IsClearBeforeWrite ? FileMode.Create : FileMode.Append);
+                FD.Write(sContent, 0, sContent.Length);
+                FD.Flush();
+                FD.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+
         public static string Read(string sFilePath)
         {
             if (sFilePath.IsBlank())

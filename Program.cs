@@ -12,15 +12,15 @@ namespace AIGS
 {
     class Program:Window
     {
-        public static void ThreadFuncDownlaod(object data)
-        {
-            Tidal.StreamUrl url = (Tidal.StreamUrl)data;
-            DownloadFileHepler.Start(url.Url, "e:\\1.m4a");
-        }
+        //public static void ThreadFuncDownlaod(object data)
+        //{
+        //    Tidal.StreamUrl url = (Tidal.StreamUrl)data;
+        //    DownloadFileHepler.Start(url.Url, "e:\\1.m4a");
+        //}
 
         static void Main(string[] args)
         {
-            ThreadPoolManager TEST = new ThreadPoolManager(1);
+            //ThreadPoolManager TEST = new ThreadPoolManager(1);
             //string sErr;
             //Tidal.Tool.LogIn("masterhd1902@qq.com", "bitchjolin", out sErr);
             ////Tidal.Tool.GetPlaylist("e70292cf-0208-4de3-9dad-535b798b8f89", out sErr);

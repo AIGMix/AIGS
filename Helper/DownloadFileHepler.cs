@@ -119,6 +119,11 @@ namespace AIGS.Helper
                 if (bOnlyGetSize)
                     return lTotalSize;
 
+                //创建目录
+                string pDir = Path.GetDirectoryName(sPath);
+                PathHelper.Mkdirs(pDir);
+
+                //打开文件
                 Stream myResponseStream   = response.GetResponseStream();
                 System.IO.Stream pFD      = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
 

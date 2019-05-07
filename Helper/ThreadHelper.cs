@@ -359,10 +359,7 @@ namespace AIGS.Helper
                     if(m_Queue.Count > 0)
                         aObj = (RECORD)m_Queue.Dequeue();
                 }
-                catch
-                {
-                    aObj = null;
-                }
+                catch{}
 
                 if(aObj == null)
                 {
@@ -371,6 +368,7 @@ namespace AIGS.Helper
                 }
                 
                 aObj.Func(aObj.data);
+                aObj = null;
             }
         }
 

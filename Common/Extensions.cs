@@ -11,6 +11,7 @@ namespace AIGS.Common
 {
     public static class Extensions
     {
+        #region String
         /// <summary>
         /// 是否空白
         /// </summary>
@@ -102,7 +103,7 @@ namespace AIGS.Common
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static long ParseLongOrDefault(this string str, long defaultValue = default(long))
+        public static long ParseLong(this string str, long defaultValue = default(long))
         {
             const NumberStyles styles = NumberStyles.AllowThousands;
             var format = NumberFormatInfo.InvariantInfo;
@@ -166,6 +167,8 @@ namespace AIGS.Common
         {
             return input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        #endregion
 
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> enumerable)
         {
