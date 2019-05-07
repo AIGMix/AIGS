@@ -16,14 +16,10 @@ namespace AIGS.Helper
 {
     public class HttpHelper
     {
-        /// <summary>
-        /// 错误信息
-        /// </summary>
-        public static string Errmsg;
-
         #region get/post
 
         public static object GetOrPost(string sUrl,
+                                out string Errmsg,
                                 Dictionary<string, string> PostData = null,
                                 bool    IsRetByte                   = false,
                                 int     Timeout                     = 5*1000, 
@@ -35,6 +31,8 @@ namespace AIGS.Helper
                                 string  Header                      = null,
                                 string  ElseMethod                  = null)
         {
+            Errmsg = null;
+
             //获取重试的次数
             int iTryNum = Retry > 0 ? Retry + 1 : 1;
             if (iTryNum > 100)
@@ -152,6 +150,7 @@ namespace AIGS.Helper
         /// 下载Jason并转换为对象
         /// </summary>
         public static T GetJsonToObject<T>(string sUrl, 
+                                            out string Errmsg,
                                             int     Timeout        = 5*1000, 
                                             bool    KeepAlive      = true, 
                                             string  UserAgent      = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
@@ -159,10 +158,10 @@ namespace AIGS.Helper
                                             int     Retry          = 0,
                                             CookieContainer Cookie = null)
         {
-            object oValue = GetOrPost(sUrl, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie);
+            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie);
             if (oValue == null)
                 return default(T);
-
+            
             return AIGS.Helper.JsonHelper.ConverStringToObject<T>(oValue.ToString());
         }
 
@@ -175,6 +174,7 @@ namespace AIGS.Helper
         /// <returns></returns>
         public static bool GetFile(string sUrl,
                                     string  sPath,
+                                    out string Errmsg,
                                     int     Timeout        = 10*1000, 
                                     bool    KeepAlive      = true, 
                                     string  UserAgent      = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
@@ -182,7 +182,7 @@ namespace AIGS.Helper
                                     int     Retry          = 0,
                                     CookieContainer Cookie = null)
         {
-            object oValue = GetOrPost(sUrl, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie);
+            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie);
             if (oValue == null)
                 return false;
 

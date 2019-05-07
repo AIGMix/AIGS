@@ -6,11 +6,15 @@ using System.Text;
 
 namespace AIGS.Common
 {
-    public class Property
+    public class Property:ViewMoudleBase
     {
-        public object Key { get; set; }
-        public object Value { get; set; }
-        public object Desc { get; set; }
+        private object key;
+        private object value;
+        private object desc;
+
+        public object Key { get { return key; } set { this.key = value;OnPropertyChanged(); } }
+        public object Value { get { return value; } set { this.value = value; OnPropertyChanged(); } }
+        public object Desc { get { return desc; } set { this.desc = value; OnPropertyChanged(); } }
 
         public Property() { }
 

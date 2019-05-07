@@ -28,6 +28,8 @@ namespace AIGS.Helper
             return 0;
         }
 
+
+
         /// <summary>
         /// 获取全部文件的大小
         /// </summary>
@@ -48,7 +50,8 @@ namespace AIGS.Helper
         /// <param name="lAlreadyDownloadSize">已下载的大小</param>
         /// <param name="lIncreSize">增量下载的大小</param>
         /// <param name="data">中间传递的数据</param>
-        public delegate void UpdateDownloadNotify(long lTotalSize, long lAlreadyDownloadSize, long lIncreSize, object data);
+        /// <returns>False: Stop Download</returns>
+        public delegate bool UpdateDownloadNotify(long lTotalSize, long lAlreadyDownloadSize, long lIncreSize, object data);
         /// <summary>
         /// 完成下载
         /// </summary>
@@ -69,7 +72,6 @@ namespace AIGS.Helper
         /// </summary>
         /// <param name="sUrl">下载链接</param>
         /// <param name="sPath">路径文件名</param>
-        /// <param name="aThis">窗口句柄</param>
         /// <param name="data">中间传递的数据</param>
         /// <param name="UpdateFunc">进度更新</param>
         /// <param name="CompleteFunc">下载结束</param>
@@ -79,7 +81,6 @@ namespace AIGS.Helper
         /// <param name="ContentType"></param>
         public static object Start(string sUrl,
                                   string sPath,
-                                  Window aThis                        = null,
                                   object data                         = null,
                                   UpdateDownloadNotify UpdateFunc     = null,
                                   CompleteDownloadNotify CompleteFunc = null,
@@ -133,22 +134,19 @@ namespace AIGS.Helper
                     pFD.Write(buf, 0, size);
                     if (UpdateFunc != null)
                     {
-                        if (aThis != null)
-                            aThis.Dispatcher.Invoke(UpdateMothed, lTotalSize, lAlreadyDownloadSize, lIncreSize, data);
-                        else
-                            UpdateMothed(lTotalSize, lAlreadyDownloadSize, lIncreSize, data);
+                        if (!UpdateMothed(lTotalSize, lAlreadyDownloadSize, lIncreSize, data))
+                            goto RETURN_POINT;
                     }
                 }
-                pFD.Close();
-                myResponseStream.Close();
+                
                 if (CompleteMothed != null)
                 {
-                    if (aThis != null)
-                        aThis.Dispatcher.Invoke(CompleteMothed, lTotalSize, data);
-                    else
-                        CompleteMothed(lTotalSize, data);
+                    CompleteMothed(lTotalSize, data);
                 }
 
+            RETURN_POINT:
+                pFD.Close();
+                myResponseStream.Close();
                 return true;
             }
             catch(System.Exception e)
@@ -161,10 +159,7 @@ namespace AIGS.Helper
 
                 if (ErrMothed != null)
                 {
-                    if (aThis != null)
-                        aThis.Dispatcher.Invoke(ErrMothed, lTotalSize, lAlreadyDownloadSize, e.Message, data);
-                    else
-                        ErrMothed(lTotalSize, lAlreadyDownloadSize, e.Message, data);
+                    ErrMothed(lTotalSize, lAlreadyDownloadSize, e.Message, data);
                 }
                 if (bOnlyGetSize)
                     return 0;

@@ -137,6 +137,20 @@ namespace AIGS.Helper
             return aRet;
         }
 
+        /// <summary>
+        /// 创建目录
+        /// </summary>
+        /// <param name="sPath"></param>
+        /// <returns></returns>
+        public static bool Mkdirs(string sPath)
+        {
+            if(Directory.Exists(sPath))
+                return true;
 
+            Directory.CreateDirectory(sPath);
+            if (!Directory.Exists(sPath))
+                return false;
+            return true;
+        }
     }
 }

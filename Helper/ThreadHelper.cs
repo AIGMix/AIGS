@@ -31,11 +31,6 @@ namespace AIGS.Helper
 
         #endregion
 
-
-
-
-
-
         #region 动态接口
 
         /// <summary>
@@ -247,12 +242,137 @@ namespace AIGS.Helper
         }
 
         #endregion
+    }
 
+    public class ThreadPoolManager
+    {
+        public delegate void EventFunc(object[] data);
 
+        private class RECORD
+        {
+            public EventFunc Func;
+            public object[] data;
+        }
 
+        private class RECORD2
+        {
+            public Thread Handle;
+            public int ShutdownIndex;
+        }
 
+        /// <summary>
+        /// 线程链表
+        /// </summary>
+        private List<RECORD2> m_ThreadArrary = new List<RECORD2>();
+        private Queue<RECORD> m_Queue       = new Queue<RECORD>();
+        private List<bool> m_ThreadShutdown = new List<bool>();
 
+        public ThreadPoolManager(int iTreadMaxNum = 5)
+        {
+            //初始化线程链表
+            for (int i = 0; i < iTreadMaxNum; i++)
+            {
+                m_ThreadShutdown.Add(false);
 
+                RECORD2 aObj = new RECORD2();
+                aObj.ShutdownIndex = i;
+                aObj.Handle        = ThreadHelper.Start(ThreadFuncWork, i);
+
+                m_ThreadArrary.Add(aObj);
+            }
+        }
+        
+        /// <summary>
+        /// 添加新事件
+        /// </summary>
+        public void AddWork(EventFunc Func, object[] data)
+        {
+            RECORD aObj = new RECORD() { Func = Func, data = data };
+            m_Queue.Enqueue(aObj);
+        }
+
+        /// <summary>
+        /// 清空线程池
+        /// </summary>
+        public void CloseAll()
+        {
+            for (int i = 0; i < m_ThreadShutdown.Count; i++)
+                m_ThreadShutdown[i] = true;
+            m_ThreadArrary.Clear();
+        }
+
+        /// <summary>
+        /// 获取线程池大小
+        /// </summary>
+        public int GetPoolSize()
+        {
+            return m_ThreadArrary.Count;
+        }
+
+        /// <summary>
+        /// 设置线程池大小
+        /// </summary>
+        /// <param name="iSize"></param>
+        public void SetPoolSize(int iSize)
+        {
+            int iCmpSize = iSize - m_ThreadArrary.Count;
+            if (iCmpSize == 0)
+                return;
+            if (iCmpSize > 0)
+            {
+                for (int i = 0; i < iCmpSize; i++)
+                {
+                    m_ThreadShutdown.Add(false);
+                    RECORD2 aObj       = new RECORD2();
+                    aObj.ShutdownIndex = m_ThreadShutdown.Count - 1;
+                    aObj.Handle        = ThreadHelper.Start(ThreadFuncWork, aObj.ShutdownIndex);
+
+                    m_ThreadArrary.Add(aObj);
+                }
+            }
+            else
+            {
+                while(iCmpSize < 0)
+                {
+                    RECORD2 aObj = m_ThreadArrary[m_ThreadArrary.Count - 1];
+                    m_ThreadShutdown[aObj.ShutdownIndex] = true;
+                    m_ThreadArrary.RemoveAt(m_ThreadArrary.Count - 1);
+
+                    iCmpSize++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 线程处理函数
+        /// </summary>
+        private void ThreadFuncWork(object[] data)
+        {
+            RECORD aObj      = null;
+            int iStatusIndex = (int)data[0];
+            while (true)
+            {
+                if (m_ThreadShutdown[iStatusIndex])
+                    return;
+                try
+                {
+                    if(m_Queue.Count > 0)
+                        aObj = (RECORD)m_Queue.Dequeue();
+                }
+                catch
+                {
+                    aObj = null;
+                }
+
+                if(aObj == null)
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+                
+                aObj.Func(aObj.data);
+            }
+        }
 
     }
 
