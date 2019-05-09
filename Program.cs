@@ -12,14 +12,30 @@ namespace AIGS
 {
     class Program:Window
     {
-        //public static void ThreadFuncDownlaod(object data)
-        //{
-        //    Tidal.StreamUrl url = (Tidal.StreamUrl)data;
-        //    DownloadFileHepler.Start(url.Url, "e:\\1.m4a");
-        //}
+        ///解码
+        public static string DecodeBase64(string code_type, string code)
+        {
+            string decode = "";
+            byte[] bytes = Convert.FromBase64String(code);
+            try
+            {
+                decode = Encoding.GetEncoding(code_type).GetString(bytes);
+            }
+            catch
+            {
+                decode = code;
+            }
+            return decode;
+        }
 
         static void Main(string[] args)
         {
+            string val1 = DecodeBase64("utf-8", "UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
+
+            string val2 = DecodeBase64("utf-8", "R4ErYi0h3Rqnad5TBfjuLmiadD/2Y8Nhhml56xHmvX6/fCVyzjNFeahhCuSObXIT");
+            string iv = val2.Substring(0, 17);
+            string encrypted_st = val2.Substring(16);
+
             //ThreadPoolManager TEST = new ThreadPoolManager(1);
             //string sErr;
             //Tidal.Tool.LogIn("masterhd1902@qq.com", "bitchjolin", out sErr);

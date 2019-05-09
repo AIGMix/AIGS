@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E0F1B398-B4D4-4536-9135-BE2EB077BBB2}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AIGS</RootNamespace>
     <AssemblyName>AIGS</AssemblyName>
@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="Common\Status.cs" />
     <Compile Include="Control\PasswordBoxHelper.cs" />
+    <Compile Include="Helper\AESHelper.cs" />
     <Compile Include="Helper\EncryptHelper.cs" />
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\DllSample.cs" />
