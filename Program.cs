@@ -13,28 +13,38 @@ namespace AIGS
     class Program:Window
     {
         ///解码
-        public static string DecodeBase64(string code_type, string code)
+        public static byte[]  DecodeBase64(string code_type, string code)
         {
             string decode = "";
             byte[] bytes = Convert.FromBase64String(code);
-            try
-            {
-                decode = Encoding.GetEncoding(code_type).GetString(bytes);
-            }
-            catch
-            {
-                decode = code;
-            }
-            return decode;
+            return bytes;
         }
 
+        public static bool DecryptFile(string sText)
+        {
+            byte[] master_key     = Convert.FromBase64String("UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
+            byte[] security_token = Convert.FromBase64String(sText);
+
+            byte[] iv  = security_token.Skip(0).Take(16).ToArray();
+            byte[] str = security_token.Skip(16).ToArray();
+            byte[] dec = AESHelper.Decrypt(str, master_key, iv);
+
+            byte[] key   = dec.Skip(0).Take(16).ToArray();
+            byte[] nonce = dec.Skip(16).Take(8).ToArray();
+            return true;
+        }
+
+        //b'!\x0f\xc7\xbb\x81\x869\xacH\xa4\xc6\xaf\xa2\xf1X\x1a'
+        //b'\xb0\x96\x01\x8aPmC\x08'
         static void Main(string[] args)
         {
-            string val1 = DecodeBase64("utf-8", "UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
+            DecryptFile("R4ErYi0h3Rqnad5TBfjuLmiadD/2Y8Nhhml56xHmvX6/fCVyzjNFeahhCuSObXIT");
 
-            string val2 = DecodeBase64("utf-8", "R4ErYi0h3Rqnad5TBfjuLmiadD/2Y8Nhhml56xHmvX6/fCVyzjNFeahhCuSObXIT");
-            string iv = val2.Substring(0, 17);
-            string encrypted_st = val2.Substring(16);
+            byte[] master_key = DecodeBase64("utf-8", "UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
+            byte[] security_token = DecodeBase64("utf-8", "R4ErYi0h3Rqnad5TBfjuLmiadD/2Y8Nhhml56xHmvX6/fCVyzjNFeahhCuSObXIT");
+            byte[] iv = security_token.Skip(0).Take(16).ToArray();
+            byte[] encrypted_st = security_token.Skip(16).ToArray();
+            byte[] decryptor = AESHelper.Decrypt(encrypted_st, master_key, iv);
 
             //ThreadPoolManager TEST = new ThreadPoolManager(1);
             //string sErr;
