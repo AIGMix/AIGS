@@ -7,7 +7,10 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Threading;
-
+using System.Threading.Tasks;
+using System.IO;
+using System.Net;
+using AIG12306.Train;
 namespace AIGS
 {
     class Program:Window
@@ -19,7 +22,7 @@ namespace AIGS
             byte[] bytes = Convert.FromBase64String(code);
             return bytes;
         }
-
+        
         public static bool DecryptFile(string sText)
         {
             byte[] master_key     = Convert.FromBase64String("UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
@@ -34,10 +37,44 @@ namespace AIGS
             return true;
         }
 
+
+        private static async Task<long> AccessWebAsync()
+        {
+            var ret = await Task.Run<long>(() =>
+            {
+
+                MemoryStream content = new MemoryStream();
+
+                // 对MSDN发起一个Web请求
+                HttpWebRequest webRequest = WebRequest.Create("http://msdn.microsoft.com/zh-cn/") as HttpWebRequest;
+                if (webRequest != null)
+                {
+                    // 返回回复结果
+                    using (WebResponse response = webRequest.GetResponse())
+                    {
+                        using (Stream responseStream = response.GetResponseStream())
+                        {
+                            responseStream.CopyTo(content);
+                        }
+                    }
+                }
+                return content.Length;
+            });
+            return ret;
+        }
+
         //b'!\x0f\xc7\xbb\x81\x869\xacH\xa4\xc6\xaf\xa2\xf1X\x1a'
         //b'\xb0\x96\x01\x8aPmC\x08'
         static void Main(string[] args)
         {
+            //}
+            Tool.Test();
+            return;
+            var r = AccessWebAsync();
+            long len = r.Result;
+            if (len >= 0)
+                len = 0;
+            //Tool.Test();
             DecryptFile("R4ErYi0h3Rqnad5TBfjuLmiadD/2Y8Nhhml56xHmvX6/fCVyzjNFeahhCuSObXIT");
 
             byte[] master_key = DecodeBase64("utf-8", "UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=");
@@ -46,31 +83,7 @@ namespace AIGS
             byte[] encrypted_st = security_token.Skip(16).ToArray();
             byte[] decryptor = AESHelper.Decrypt(encrypted_st, master_key, iv);
 
-            //ThreadPoolManager TEST = new ThreadPoolManager(1);
-            //string sErr;
-            //Tidal.Tool.LogIn("masterhd1902@qq.com", "bitchjolin", out sErr);
-            ////Tidal.Tool.GetPlaylist("e70292cf-0208-4de3-9dad-535b798b8f89", out sErr);
-            //Tidal.Album album = Tidal.Tool.GetAlbum("79412401", out sErr);
-            //Tidal.StreamUrl url = Tidal.Tool.GetStreamUrl(album.Tracks[0].ID, "LOW", out sErr);
-            //ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadFuncDownlaod), url);
-            while (true) ;
-            //Tidal.Account Account = new Tidal.Account();
-            //Account.LogIn("masterhd1902@qq.com", "bitchjolin");
-            //Tidal.TidalTool.User = Account;
-            //Tidal.Video v = Tidal.TidalTool.GetVideo("45219814");
-            //Dictionary<string, string> pResolist = Tidal.TidalTool.GetVideoResolutionList("45219814");
-
-            //List<string> pList = Tidal.TidalTool.GetVideoM3u8FileUrlList(pResolist.ElementAt(2).Value);
-            //List<string> pFiles = new List<string>();
-            //for (int i = 0; i < pList.Count(); i++)
-            //{
-            //    string sPath = "e:\\7\\test\\" + i + ".mp4";
-            //    bool bCheck  = (bool)DownloadFileHepler.Start(pList[i], sPath, ContentType:null, UserAgent:null);
-            //    if (bCheck == false)
-            //        i = i;
-            //    pFiles.Add(sPath);
-            //}
-            //FFmpegHelper.MergerByFiles(pFiles.ToArray(), "E:\\7\\TAGET.mp4");
+            
 
             List<string> pFiles = new List<string>();
             for (int i = 0; i < 42; i++)

@@ -11,6 +11,18 @@ namespace AIGS.Helper
     {
         #region 静态接口
         /// <summary>
+        /// 获取时间戳（毫秒）
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTimeStamp()
+        {
+            DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1, 0, 0, 0, 0));
+            DateTime nowTime   = DateTime.Now;
+            long unixTime      = (long)System.Math.Round((nowTime - startTime).TotalMilliseconds, MidpointRounding.AwayFromZero);
+            return unixTime.ToString();
+        }
+
+        /// <summary>
         /// 秒数转字符串（0 -> 00:00:00）
         /// </summary>
         /// <param name="iSecond">秒</param>

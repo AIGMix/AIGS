@@ -351,6 +351,14 @@ namespace AIGS.Common
             return iRet;
         }
 
+        public static int[] ConverStringsToInts(string[] sArray, int iDefault = 0)
+        {
+            int[] pRet = new int[sArray.Length];
+            for (int i = 0; i < sArray.Length; i++)
+                pRet[i] = ConverStringToInt(sArray[i], iDefault);
+            return pRet;
+        }
+
         #endregion
 
         #region Bitmap

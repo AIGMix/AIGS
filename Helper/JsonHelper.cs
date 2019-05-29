@@ -24,18 +24,17 @@ namespace AIGS.Helper
         {
             if (String.IsNullOrWhiteSpace(sStr))
                 return default(T);
-
-            foreach(string sName in sKeyName)
-            {
-                JObject jo = JObject.Parse(sStr);
-                if(jo[sName] == null)
-                    return default(T);
-
-                sStr = jo[sName].ToString();
-            }
-
             try
             {
+                foreach (string sName in sKeyName)
+                {
+                    JObject jo = JObject.Parse(sStr);
+                    if(jo[sName] == null)
+                        return default(T);
+
+                    sStr = jo[sName].ToString();
+                }
+            
                 T pRet = JsonConvert.DeserializeObject<T>(sStr);
                 return pRet;
             }
@@ -63,6 +62,22 @@ namespace AIGS.Helper
             {
                 return "";
             }
+        }
+
+        /// <summary>
+        /// 将字典类型序列化为json字符串
+        /// </summary>
+        /// <typeparam name="TKey">字典key</typeparam>
+        /// <typeparam name="TValue">字典value</typeparam>
+        /// <param name="dict">要序列化的字典数据</param>
+        /// <returns>json字符串</returns>
+        public static string SerializeDictionaryToJsonString<TKey, TValue>(Dictionary<TKey, TValue> dict)
+        {
+            if (dict.Count == 0)
+                return "";
+
+            string jsonStr = JsonConvert.SerializeObject(dict);
+            return jsonStr;
         }
 
         /// <summary>

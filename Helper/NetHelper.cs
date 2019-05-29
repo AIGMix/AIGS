@@ -39,6 +39,28 @@ namespace AIGS.Helper
             }
         }
 
+        /// <summary>
+        /// 对Url进行编码
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public static string UrlEncode(string url, Encoding encoding)
+        {
+            var result = HttpUtility.UrlEncode(url, encoding);
+            return result;
+        }
+
+        /// <summary>
+        /// 对Url进行解码
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string UrlDecode(string url)
+        {
+            return HttpUtility.UrlDecode(url);
+        }
+
 
         [DllImport("wininet.dll")]
         private extern static bool InternetGetConnectedState(ref int Description, int ReservedValue);
