@@ -40,6 +40,7 @@ namespace AIGS.Helper
 
         public class Record
         {
+            public bool   IsHttp { get; set; } = false;
             public string Host { get; set; } 
             public string Path { get; set; }
             public string FormatStr { get; set; }
@@ -176,7 +177,8 @@ namespace AIGS.Helper
 
         public static async Task<Result> GetOrPostAsync(Record Obj, CookieContainer Cookie = null)
         {
-            return await GetOrPostAsync(Obj.Host + Obj.Path, 
+            string sPre = Obj.IsHttp ? "http://" : "https://";
+            return await GetOrPostAsync(sPre + Obj.Host + Obj.Path, 
                                         PostData:Obj.PostParas,
                                         IsRetByte:Obj.IsRetByte, 
                                         Timeout:Obj.Time,
