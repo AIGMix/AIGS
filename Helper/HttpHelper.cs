@@ -70,7 +70,8 @@ namespace AIGS.Helper
                                 string ElseMethod                   = null,
                                 string PostJson                     = null,
                                 string Accept                       = null,
-                                string Referer                      = null)
+                                string Referer                      = null,
+                                bool EnableAsync                    = true)
         {
             string Errmsg = null;
 
@@ -130,8 +131,17 @@ namespace AIGS.Helper
                 System.GC.Collect();
 
                 //开始请求
-                var resp = await request.GetResponseAsync();
-                HttpWebResponse response = (HttpWebResponse)resp;
+                HttpWebResponse response = null;
+                if (EnableAsync)
+                {
+                    var resp = await request.GetResponseAsync();
+                    response = (HttpWebResponse)resp;
+                }
+                else
+                {
+                    var resp = request.GetResponse();
+                    response = (HttpWebResponse)resp;
+                }
 
                 byte[] retByte = null;
                 string retString = null;
@@ -208,7 +218,7 @@ namespace AIGS.Helper
                                 string  ElseMethod                  = null,
                                 string  PostJson                    = null)
         {
-            var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson);
+            var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync:false);
             Errmsg  = Res.Result.Errmsg;
             return Res.Result.oData;
         }

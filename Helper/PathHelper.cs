@@ -121,9 +121,8 @@ namespace AIGS.Helper
         /// 获取目录下的文件名
         /// </summary>
         /// <param name="sPath"></param>
-        /// <param name="bIsDirectoryName">是否为路径名</param>
         /// <returns></returns>
-        public static string[] GetFileNames(string sPath, bool bIsDirectoryName = false)
+        public static string[] GetFileNames(string sPath)
         {
             DirectoryInfo aDirectory = new DirectoryInfo(sPath);
             FileInfo[] Infos = aDirectory.GetFiles();
@@ -132,8 +131,8 @@ namespace AIGS.Helper
 
             string[] aRet = new string[Infos.Count()];
             for (int i = 0; i < aRet.Count(); i++)
-                aRet[i] = bIsDirectoryName ? Infos[i].DirectoryName : Infos[i].Name;
-
+                aRet[i] = Infos[i].FullName;
+            
             return aRet;
         }
 
