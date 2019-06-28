@@ -57,6 +57,30 @@ namespace AIGS.Helper
         {
             return System.Environment.CurrentDirectory;
         }
+
+        /// <summary>
+        /// 获取嵌入文本资源
+        /// </summary>
+        /// <param name="res"></param>
+        /// <returns></returns>
+        public static string GetEmbedText(string sPath)
+        {
+            string result = string.Empty;
+
+            try
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                using (Stream stream = assembly.GetManifestResourceStream(assembly.GetName().Name + '.' + sPath))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    result = reader.ReadToEnd();
+                }
+            }
+            catch
+            {
+            }
+            return result;
+        }
         #endregion
 
         #region 用户相关信息

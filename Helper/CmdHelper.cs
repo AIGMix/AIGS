@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace AIGS.Helper
 {
@@ -110,13 +111,17 @@ namespace AIGS.Helper
         /// <param name="sArg">Main参</param>
         /// <param name="sWorkDir">工作目录</param>
         /// <param name="pFunc">输出重定向的响应</param>
+        /// <param name="bWaitExit">是否等待结束</param>
         /// <returns>错误码</returns>
         public static int StartExe2(ref Process aProcess, 
                                     string sExePath, 
                                     string sArg, 
                                     string sWorkDir = null, 
-                                    System.Diagnostics.DataReceivedEventHandler pFunc = null)
+                                    System.Diagnostics.DataReceivedEventHandler pFunc = null,
+                                    bool bWaitExit = true)
         {
+            if (aProcess == null)
+                aProcess = new Process();
             aProcess.StartInfo.FileName = sExePath;
             aProcess.StartInfo.Arguments = sArg;
             aProcess.StartInfo.UseShellExecute = false;
@@ -135,8 +140,12 @@ namespace AIGS.Helper
             {
                 aProcess.Start();
                 aProcess.BeginOutputReadLine();
-                aProcess.WaitForExit();
-                return aProcess.ExitCode;
+                if (bWaitExit)
+                {
+                    aProcess.WaitForExit();
+                    return aProcess.ExitCode;
+                }
+                return 0;
             }
             catch
             {
@@ -159,6 +168,41 @@ namespace AIGS.Helper
         {
             Process aProcess = new Process();
             return StartExe2(ref aProcess, sExePath, sArg, sWorkDir, pFunc);
+        }
+
+        /// <summary>
+        /// 查找进程
+        /// </summary>
+        /// <param name="sName"></param>
+        /// <returns></returns>
+        public static Process[] FindProcess(string sName)
+        {
+            List<Process> pRet = new List<Process>();
+            Process[] sList = Process.GetProcesses();
+            foreach (var item in sList)
+            {
+                if (item.ProcessName == sName)
+                    pRet.Add(item);
+            }
+            return pRet.ToArray();
+        }
+
+        /// <summary>
+        /// 杀死所有进程
+        /// </summary>
+        /// <param name="sName"></param>
+        /// <returns></returns>
+        public static void KillProcess(string sName)
+        {
+            try
+            {
+                Process[] sList = FindProcess(sName);
+                foreach (var item in sList)
+                {
+                    item.Kill();
+                }
+            }
+            catch { }
         }
 
         #endregion
