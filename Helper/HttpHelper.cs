@@ -40,21 +40,34 @@ namespace AIGS.Helper
 
         public class Record
         {
-            public bool   IsHttp { get; set; } = false;
+            public bool   IsHttp { get; set; }
             public string Host { get; set; } 
             public string Path { get; set; }
             public string FormatStr { get; set; }
-            public string Method { get; set; } = "GET";
-            public bool   IsRetByte { get; set; } = false;
-            public bool   KeepAlive { get; set; } = true;
-            public int    Retry { get; set; } = 3;
-            public int    Time { get; set; } = 5*1000;
+            public string Method { get; set; } 
+            public bool   IsRetByte { get; set; } 
+            public bool   KeepAlive { get; set; } 
+            public int    Retry { get; set; } 
+            public int    Time { get; set; } 
             public string Accept { get; set; }
             public string Referer { get; set; }
-            public string UserAgent { get; set; } = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36";
-            public string ContentType { get; set; } = "application/x-www-form-urlencoded; charset=UTF-8";
+            public string UserAgent { get; set; } 
+            public string ContentType { get; set; } 
             public string PostJson { get; set; }
             public Dictionary<string, string> PostParas { get; set; }
+
+            public Record()
+            {
+                Method = "GET";
+                IsHttp = false;
+                IsRetByte = false;
+                KeepAlive = true;
+                Retry = 3;
+                Time = 5*1000;
+                UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36";
+                ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
         }
 
         public static async Task<Result> GetOrPostAsync(string sUrl,

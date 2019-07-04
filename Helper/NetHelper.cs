@@ -61,7 +61,6 @@ namespace AIGS.Helper
             return HttpUtility.UrlDecode(url);
         }
 
-
         [DllImport("wininet.dll")]
         private extern static bool InternetGetConnectedState(ref int Description, int ReservedValue);
 
@@ -75,24 +74,45 @@ namespace AIGS.Helper
             return InternetGetConnectedState(ref dwFlag, 0);
         }
 
-
         /// <summary>
         /// 用于检查IP地址或域名是否可以使用TCP/IP协议访问
         /// </summary>
         /// <param name="strIpOrDName">输入参数,表示IP地址或域名</param>
         /// <returns></returns>
-        public static bool PingIpOrDomainName(string strIpOrDName, int iTimeOut = 0)
+        public static bool PingIpOrDomainName(string strIpOrDName)
         {
+            long lTime = GetPingIpOrDomainNameTime(strIpOrDName);
+            if (lTime >= 0)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 获取Ping的延迟(毫秒)
+        /// </summary>
+        /// <param name="strIpOrDName">输入参数,表示IP地址或域名</param>
+        public static long GetPingIpOrDomainNameTime(string strIpOrDName)
+        {
+            long iRetTime = -1;
             try
             {
+                int iTryNum = 2;
                 Ping aPing = new Ping();
-                PingReply aPinReply = iTimeOut > 0 ? aPing.Send(strIpOrDName, iTimeOut) : aPing.Send(strIpOrDName);
-                return aPinReply.Status == IPStatus.Success ? true : false;
+                for (int i = 0; i < iTryNum; i++)
+                {
+                    PingReply aPinReply = aPing.Send(strIpOrDName, 120);
+                    if (aPinReply.Status == IPStatus.Success)
+                    {
+                        if (aPinReply.RoundtripTime < 0)
+                            continue;
+                        if (iRetTime < 0 || aPinReply.RoundtripTime < iRetTime)
+                            iRetTime = aPinReply.RoundtripTime;
+                    }
+                }
             }
             catch (Exception)
             {
-                return false;
             }
+            return iRetTime;
         }
 
         /// <summary>
@@ -303,7 +323,6 @@ namespace AIGS.Helper
         }
 
         #endregion
-
 
     }
 

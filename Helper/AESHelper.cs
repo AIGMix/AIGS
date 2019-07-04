@@ -156,7 +156,7 @@ namespace AIGS.Helper
 
             if (!Array.Exists(allowedKeyLengths, allowed => allowed == key.Length))
             {
-                throw new ArgumentException($"Key length must be {allowedKeyLengths[0]}, {allowedKeyLengths[1]} or {allowedKeyLengths[2]} bytes. Actual: {key.Length}");
+                throw new ArgumentException("Key length must be {allowedKeyLengths[0]}, {allowedKeyLengths[1]} or {allowedKeyLengths[2]} bytes. Actual: {key.Length}");
             }
 
             if (initialCounter == null)
@@ -166,7 +166,7 @@ namespace AIGS.Helper
 
             if (allowedCounterLength != initialCounter.Length)
             {
-                throw new ArgumentException($"Initial counter must be {allowedCounterLength} bytes");
+                throw new ArgumentException("Initial counter must be {allowedCounterLength} bytes");
             }
 
             this.isDisposed = false;
@@ -339,7 +339,7 @@ namespace AIGS.Helper
 
             if (output.Length < numBytes)
             {
-                throw new ArgumentOutOfRangeException("output", $"Output byte array should be able to take at least {numBytes}");
+                throw new ArgumentOutOfRangeException("output", "Output byte array should be able to take at least {numBytes}");
             }
 
             if (isDisposed)

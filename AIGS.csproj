@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Debug\</OutputPath>
+    <OutputPath>..\V2rayAig\packages\AIGS\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -205,6 +205,7 @@
     <Compile Include="Helper\MathHelper.cs" />
     <Compile Include="Helper\MssqlHelper.cs" />
     <Compile Include="Helper\NetHelper.cs" />
+    <Compile Include="Helper\NetSpeedHelper.cs" />
     <Compile Include="Helper\PathHelper.cs" />
     <Compile Include="Helper\QueueHelper.cs" />
     <Compile Include="Helper\RandHelper.cs" />
@@ -243,7 +244,6 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,6 +7,7 @@ using AIGS.Helper;
 using System.Net;
 using System.IO;
 using System.Windows;
+using System.Threading.Tasks;
 
 namespace AIGS.Helper
 {
@@ -91,6 +92,35 @@ namespace AIGS.Helper
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false)
         {
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize);
+            return oBj.Result;
+        }
+
+
+        /// <summary>
+        /// 启动下载
+        /// </summary>
+        /// <param name="sUrl">下载链接</param>
+        /// <param name="sPath">路径文件名</param>
+        /// <param name="data">中间传递的数据</param>
+        /// <param name="UpdateFunc">进度更新</param>
+        /// <param name="CompleteFunc">下载结束</param>
+        /// <param name="ErrFunc">错误</param>
+        /// <param name="Timeout">超时</param>
+        /// <param name="UserAgent"></param>
+        /// <param name="ContentType"></param>
+        public static async Task<object> StartAsync(string sUrl,
+                                  string sPath,
+                                  object data                         = null,
+                                  UpdateDownloadNotify UpdateFunc     = null,
+                                  CompleteDownloadNotify CompleteFunc = null,
+                                  ErrDownloadNotify ErrFunc           = null,
+                                  int RetryNum                        = 0,
+                                  int Timeout                         = 5 * 1000,
+                                  string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
+                                  string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
+                                  bool bOnlyGetSize                   = false)
+        {
             UpdateDownloadNotify UpdateMothed     = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
             CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
             ErrDownloadNotify ErrMothed           = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
@@ -112,9 +142,10 @@ namespace AIGS.Helper
                 request.Timeout           = Timeout;
                 //request.KeepAlive       = true;
                 request.UserAgent         = UserAgent;
-
+                
                 //开始请求
-                HttpWebResponse response  = (HttpWebResponse)request.GetResponse();
+                var resp = await request.GetResponseAsync();
+                HttpWebResponse response = (HttpWebResponse)resp;
                 lTotalSize = response.ContentLength;
                 if (bOnlyGetSize)
                     return lTotalSize;
