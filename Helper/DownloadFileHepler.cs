@@ -109,7 +109,7 @@ namespace AIGS.Helper
         /// <param name="Timeout">超时</param>
         /// <param name="UserAgent"></param>
         /// <param name="ContentType"></param>
-        public static async Task<object> StartAsync(string sUrl,
+        public static Task<object> StartAsync(string sUrl,
                                   string sPath,
                                   object data                         = null,
                                   UpdateDownloadNotify UpdateFunc     = null,
@@ -121,86 +121,89 @@ namespace AIGS.Helper
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false)
         {
-            UpdateDownloadNotify UpdateMothed     = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
-            CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
-            ErrDownloadNotify ErrMothed           = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
-            long lAlreadyDownloadSize             = 0;
-            long lTotalSize                       = 0;
-            long lIncreSize                       = 0;
-
-            if (RetryNum > 50)
-                RetryNum = 50;
-
-            RETRY_ENTRY:
-            try
+            return Task.Run(() =>
             {
-                ServicePointManager.Expect100Continue = false;
 
-                HttpWebRequest request    = (HttpWebRequest)WebRequest.Create(sUrl);
-                request.Method            = "GET";
-                request.ContentType       = ContentType;
-                request.Timeout           = Timeout;
-                //request.KeepAlive       = true;
-                request.UserAgent         = UserAgent;
-                
-                //开始请求
-                var resp = await request.GetResponseAsync();
-                HttpWebResponse response = (HttpWebResponse)resp;
-                lTotalSize = response.ContentLength;
-                if (bOnlyGetSize)
-                    return lTotalSize;
+                UpdateDownloadNotify UpdateMothed = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
+                CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
+                ErrDownloadNotify ErrMothed = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
+                long lAlreadyDownloadSize = 0;
+                long lTotalSize = 0;
+                long lIncreSize = 0;
 
-                //创建目录
-                string pDir = Path.GetDirectoryName(sPath);
-                PathHelper.Mkdirs(pDir);
+                if (RetryNum > 50)
+                    RetryNum = 50;
 
-                //打开文件
-                Stream myResponseStream   = response.GetResponseStream();
-                System.IO.Stream pFD      = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
-
-                //如果走到这里的话，就不能重试了，要不如进度会出错
-                RetryNum = 0;
-
-                byte[] buf = new byte[1024];
-                int size   = 0;
-                while ((size = myResponseStream.Read(buf, 0, (int)buf.Length)) > 0)
+                RETRY_ENTRY:
+                try
                 {
-                    lIncreSize = size;
-                    lAlreadyDownloadSize += size;
-                    pFD.Write(buf, 0, size);
-                    if (UpdateFunc != null)
+                    ServicePointManager.Expect100Continue = false;
+
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sUrl);
+                    request.Method = "GET";
+                    request.ContentType = ContentType;
+                    request.Timeout = Timeout;
+                    //request.KeepAlive       = true;
+                    request.UserAgent = UserAgent;
+
+                    //开始请求
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    lTotalSize = response.ContentLength;
+                    if (bOnlyGetSize)
+                        return (object)lTotalSize;
+
+                    //创建目录
+                    string pDir = Path.GetDirectoryName(sPath);
+                    PathHelper.Mkdirs(pDir);
+
+                    //打开文件
+                    Stream myResponseStream = response.GetResponseStream();
+                    System.IO.Stream pFD = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
+
+                    //如果走到这里的话，就不能重试了，要不如进度会出错
+                    RetryNum = 0;
+
+                    byte[] buf = new byte[1024];
+                    int size = 0;
+                    while ((size = myResponseStream.Read(buf, 0, (int)buf.Length)) > 0)
                     {
-                        if (!UpdateMothed(lTotalSize, lAlreadyDownloadSize, lIncreSize, data))
-                            goto RETURN_POINT;
+                        lIncreSize = size;
+                        lAlreadyDownloadSize += size;
+                        pFD.Write(buf, 0, size);
+                        if (UpdateFunc != null)
+                        {
+                            if (!UpdateMothed(lTotalSize, lAlreadyDownloadSize, lIncreSize, data))
+                                goto RETURN_POINT;
+                        }
                     }
-                }
-                
-                if (CompleteMothed != null)
-                {
-                    CompleteMothed(lTotalSize, data);
-                }
 
-            RETURN_POINT:
-                pFD.Close();
-                myResponseStream.Close();
-                return true;
-            }
-            catch(System.Exception e)
-            {
-                if(RetryNum > 0)
-                {
-                    RetryNum--;
-                    goto RETRY_ENTRY;
-                }
+                    if (CompleteMothed != null)
+                    {
+                        CompleteMothed(lTotalSize, data);
+                    }
 
-                if (ErrMothed != null)
-                {
-                    ErrMothed(lTotalSize, lAlreadyDownloadSize, e.Message, data);
+                    RETURN_POINT:
+                    pFD.Close();
+                    myResponseStream.Close();
+                    return true;
                 }
-                if (bOnlyGetSize)
-                    return 0;
-                return false;
-            }
+                catch (System.Exception e)
+                {
+                    if (RetryNum > 0)
+                    {
+                        RetryNum--;
+                        goto RETRY_ENTRY;
+                    }
+
+                    if (ErrMothed != null)
+                    {
+                        ErrMothed(lTotalSize, lAlreadyDownloadSize, e.Message, data);
+                    }
+                    if (bOnlyGetSize)
+                        return (object)0;
+                    return (object)false;
+                }
+            });
         }
     }
 

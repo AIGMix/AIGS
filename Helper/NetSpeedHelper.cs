@@ -20,7 +20,7 @@ namespace AIGS.Helper
         /// <summary>
         /// 更新进度条回调
         /// </summary>
-        public delegate bool UpdateProgressNotify(int dValue);
+        public delegate bool UpdateProgressNotify(int iProgressValue, double dCurSpeed);
 
         /// <summary>
         /// 获取临时文件名
@@ -60,7 +60,7 @@ namespace AIGS.Helper
             if (sFilePath.IsBlank())
                 return -1;
 
-            object oObj = await DownloadFileHepler.StartAsync(TEST_URL, sFilePath, null, UpdateDownloadNotify, CompleteDownloadNotify, null, 3);
+            await DownloadFileHepler.StartAsync(TEST_URL, sFilePath, null, UpdateDownloadNotify, CompleteDownloadNotify, null, 3);
             if (File.Exists(sFilePath))
                 File.Delete(sFilePath);
             return DownloadSpeed;
@@ -80,19 +80,17 @@ namespace AIGS.Helper
             int iValue = (int)(lAlreadyDownloadSize * 100 / lTotalSize);
             if(iValue == CurPro)
                 return true;
+            CurPro = iValue;
+
+            //更新下载速度
+            TimeSpan ts = (DateTime.Now - StartTime);
+            DownloadSpeed = lAlreadyDownloadSize / ts.TotalMilliseconds / 1000;
 
             //更新进度条
             if (pProgress != null)
-                pProgress(iValue);
+                return pProgress(iValue, DownloadSpeed);
 
-            //更新下载速度
-            if(iValue - CurPro > 3)
-            {
-                TimeSpan ts = (DateTime.Now - StartTime);
-                DownloadSpeed = lAlreadyDownloadSize / ts.TotalMilliseconds / 1000;
-            }
-
-            CurPro = iValue;
+            
             return true;
         }
 
@@ -103,6 +101,10 @@ namespace AIGS.Helper
         {
             TimeSpan ts = (DateTime.Now - StartTime);
             DownloadSpeed = lTotalSize / ts.TotalMilliseconds / 1000;
+
+            //更新进度条
+            if (pProgress != null)
+                pProgress(100, DownloadSpeed);
         }
 
     }
