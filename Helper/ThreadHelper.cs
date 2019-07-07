@@ -277,7 +277,7 @@ namespace AIGS.Helper
                 RECORD2 aObj = new RECORD2();
                 aObj.ShutdownIndex = i;
                 aObj.Handle        = ThreadHelper.Start(ThreadFuncWork, i);
-
+                
                 m_ThreadArrary.Add(aObj);
             }
         }
@@ -294,10 +294,19 @@ namespace AIGS.Helper
         /// <summary>
         /// 清空线程池
         /// </summary>
-        public void CloseAll()
+        public void CloseAll(bool bIsImmediately = false)
         {
             for (int i = 0; i < m_ThreadShutdown.Count; i++)
                 m_ThreadShutdown[i] = true;
+            if (bIsImmediately)
+            {
+                try
+                {
+                    for (int i = 0; i < m_ThreadArrary.Count; i++)
+                        m_ThreadArrary[i].Handle.Abort();
+                }
+                catch { }
+            }
             m_ThreadArrary.Clear();
         }
 

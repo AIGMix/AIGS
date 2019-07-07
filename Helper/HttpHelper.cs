@@ -20,14 +20,16 @@ namespace AIGS.Helper
         {
             public bool   Success { get; set; }
             public string Errmsg { get; set; }
+            public string Errresponse { get; set; }
             public object oData { get; set; }
             public string sData { get; set; }
-            public Result(bool IsSuccess, string err, object odata, string sdata)
+            public Result(bool IsSuccess, string err, object odata, string sdata, string sErrresponse=null)
             {
                 Success = IsSuccess;
                 Errmsg = err;
                 oData = odata;
                 sData = sdata;
+                Errresponse = sErrresponse;
             }
             public Result()
             {
@@ -35,6 +37,7 @@ namespace AIGS.Helper
                 Errmsg = null;
                 oData = null;
                 sData = null;
+                Errresponse = null;
             }
         }
 
@@ -87,7 +90,7 @@ namespace AIGS.Helper
                                 bool EnableAsync                    = true)
         {
             string Errmsg = null;
-
+            string Errrep = null;
             //获取重试的次数
             int iTryNum = Retry > 0 ? Retry + 1 : 1;
             if (iTryNum > 100)
@@ -193,8 +196,16 @@ namespace AIGS.Helper
             {
                 if (--iTryNum > 0)
                     goto RETRY_POINT;
+
                 Errmsg = e.Message;
-                return new Result(false, Errmsg, null, null);
+                Errrep = null;
+                if (e.Response.GetResponseStream().CanRead)
+                {
+                    StreamReader myReader = new StreamReader(e.Response.GetResponseStream(), Encoding.GetEncoding("utf-8"));
+                    Errrep = myReader.ReadToEnd();
+                    myReader.Close();
+                }
+                return new Result(false, Errmsg, null, null, Errrep);
             }
         }
 
@@ -229,11 +240,22 @@ namespace AIGS.Helper
                                 CookieContainer Cookie              = null,
                                 string  Header                      = null,
                                 string  ElseMethod                  = null,
-                                string  PostJson                    = null)
+                                string  PostJson                    = null,
+                                bool    IsErrResponse               = false)
         {
-            var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync:false);
-            Errmsg  = Res.Result.Errmsg;
-            return Res.Result.oData;
+            try
+            {
+                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false);
+                Errmsg = Res.Result.Errmsg;
+                if (IsErrResponse)
+                    Errmsg = Res.Result.Errresponse;
+                return Res.Result.oData;
+            }
+            catch
+            {
+                Errmsg = "Err!";
+                return null;
+            }
         }
 
         /// <summary>

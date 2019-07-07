@@ -145,6 +145,7 @@ namespace AIGS.Helper
                     request.Timeout = Timeout;
                     //request.KeepAlive       = true;
                     request.UserAgent = UserAgent;
+                    request.Proxy = null;
 
                     //开始请求
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
