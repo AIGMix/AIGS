@@ -361,6 +361,26 @@ namespace AIGS.Helper
         }
 
         /// <summary>
+        /// 获取开机启动项的路径
+        /// </summary>
+        /// <param name="sName">项名</param>
+        public static string GetPowerBootPath(string sName)
+        {
+            RegistryKey HKCU = Registry.CurrentUser;
+            RegistryKey REG = HKCU.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+
+            string sValue;
+            try
+            {
+                sValue = REG.GetValue(sName).ToString();
+            }
+            catch { sValue = null; }
+
+            HKCU.Close();
+            return sValue;
+        }
+
+        /// <summary>
         /// 获取系统库的路径
         /// </summary>
         /// <returns></returns>

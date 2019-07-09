@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\V2rayAig\packages\AIGS\</OutputPath>
+    <OutputPath>..\Tidal-Media-Downloader\TIDALDL-UI\packages\AIGS\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -88,106 +88,6 @@
     <Compile Include="Common\RefreshControl.cs" />
     <Compile Include="Common\Type.cs" />
     <Compile Include="Common\ViewMoudleBase.cs" />
-    <Compile Include="Control\CListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\CSplitContainer.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\AbstractProgressBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\AbstractProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\BarberPoleProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\BevelledGradientProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\BevelledProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\CandyCaneBackgroundPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\CandyCaneProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\ChainedGlossPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\ColorTools.cs" />
-    <Compile Include="Control\ProgressBar\DualProgressBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\FlatGlossPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\FruityLoopsBackgroundPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\FruityLoopsProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\GradientBackgroundPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\GradientGlossPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\HSV.cs" />
-    <Compile Include="Control\ProgressBar\IAnimatedProgressPainter.cs" />
-    <Compile Include="Control\ProgressBar\IGlossPainter.cs" />
-    <Compile Include="Control\ProgressBar\IProgressBackgroundPainter.cs" />
-    <Compile Include="Control\ProgressBar\IProgressBorderPainter.cs" />
-    <Compile Include="Control\ProgressBar\IProgressPainter.cs" />
-    <Compile Include="Control\ProgressBar\JavaProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\MetalProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\MiddleGlossPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\PlainBackgroundPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\PlainBorderPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\PlainProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\ProgressBarEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\RarBackgroundPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\RarBorderPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\RarProgressBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\RarProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\RoundGlossPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\StripedProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\StyledBorderPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Control\ProgressBar\WaveProgressPainter.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Helper\AboutHelper.cs" />
     <Compile Include="Helper\BitHelper.cs" />
     <Compile Include="Helper\ByteAlignHelper.cs" />
