@@ -156,14 +156,17 @@ namespace AIGS.Helper
                     //创建目录
                     string pDir = Path.GetDirectoryName(sPath);
                     PathHelper.Mkdirs(pDir);
+                    if(File.Exists(sPath))
+                        File.Delete(sPath);
 
                     //打开文件
                     Stream myResponseStream = response.GetResponseStream();
+                    //一分钟超时
+                    myResponseStream.ReadTimeout = 60000;
                     System.IO.Stream pFD = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
 
                     //如果走到这里的话，就不能重试了，要不如进度会出错
                     RetryNum = 0;
-
                     byte[] buf = new byte[1024];
                     int size = 0;
                     while ((size = myResponseStream.Read(buf, 0, (int)buf.Length)) > 0)

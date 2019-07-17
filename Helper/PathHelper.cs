@@ -145,7 +145,7 @@ namespace AIGS.Helper
         {
             if(Directory.Exists(sPath))
                 return true;
-
+            
             Directory.CreateDirectory(sPath);
             if (!Directory.Exists(sPath))
                 return false;

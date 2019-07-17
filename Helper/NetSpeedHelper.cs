@@ -40,6 +40,26 @@ namespace AIGS.Helper
         }
 
         /// <summary>
+        /// 删除临时文件
+        /// </summary>
+        private void RemoveTmpFile()
+        {
+            string sPath = SystemHelper.GetExeDirectoryName();
+            string[] sArra = PathHelper.GetFileNames(sPath);
+            for (int i = 0; i < sArra.Count(); i++)
+            {
+                try
+                {
+                    string sName = Path.GetFileName(sArra[i]);
+                    if (sName.IsNotBlank() && sName.IndexOf("NetSpeedTmp-") >= 0)
+                        File.Delete(sArra[i]);
+                }
+                catch { }
+            }
+        }
+
+
+        /// <summary>
         /// 开始前的准备
         /// </summary>
         private void Prepare(UpdateProgressNotify pFunc)
@@ -48,6 +68,7 @@ namespace AIGS.Helper
             FirstTime = true;
             pProgress = pFunc;
             DownloadSpeed = 0;
+            RemoveTmpFile();
         }
 
         /// <summary>
@@ -61,8 +82,7 @@ namespace AIGS.Helper
                 return -1;
 
             await DownloadFileHepler.StartAsync(TEST_URL, sFilePath, null, UpdateDownloadNotify, CompleteDownloadNotify, null, 3);
-            if (File.Exists(sFilePath))
-                File.Delete(sFilePath);
+            RemoveTmpFile();
             return DownloadSpeed;
         }
 
