@@ -28,11 +28,9 @@ namespace AIGS.Helper
             aNewThread.Start(aRecord);
             return aNewThread;
         }
-
         #endregion
 
         #region 动态接口
-
         /// <summary>
         /// 线程链表
         /// </summary>
@@ -243,6 +241,7 @@ namespace AIGS.Helper
 
         #endregion
     }
+
 
     public class ThreadPoolManager
     {
