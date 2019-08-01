@@ -16,7 +16,6 @@ namespace AIGS.Helper
             Common.Property aRecord = (Common.Property)data;
             EventFunc2 Func         = (EventFunc2)aRecord.Key;
             object[] para           = (object[])aRecord.Value;
-
             Func(para);
         }
 
@@ -28,6 +27,16 @@ namespace AIGS.Helper
             aNewThread.Start(aRecord);
             return aNewThread;
         }
+        public static void Abort(Thread Handle)
+        {
+            try
+            {
+                Handle.Abort();
+            }
+            catch { }
+        }
+
+
         #endregion
 
         #region 动态接口
@@ -243,50 +252,41 @@ namespace AIGS.Helper
     }
 
 
+
+
     public class ThreadPoolManager
     {
         public delegate void EventFunc(object[] data);
-
-        private class RECORD
+        private class WorkItem
         {
             public EventFunc Func;
             public object[] data;
         }
 
-        private class RECORD2
+        private class ThreadItem
         {
             public Thread Handle;
-            public int ShutdownIndex;
+            public int    Index;
+            public bool   Shutdown;
         }
 
         /// <summary>
         /// 线程链表
         /// </summary>
-        private List<RECORD2> m_ThreadArrary = new List<RECORD2>();
-        private Queue<RECORD> m_Queue       = new Queue<RECORD>();
-        private List<bool> m_ThreadShutdown = new List<bool>();
-
+        private List<ThreadItem> m_ThreadArrary   = new List<ThreadItem>();
+        private List<ThreadItem> m_ThreadShutdown = new List<ThreadItem>();
+        private Queue<WorkItem> m_Queue           = new Queue<WorkItem>();
         public ThreadPoolManager(int iTreadMaxNum = 5)
         {
-            //初始化线程链表
-            for (int i = 0; i < iTreadMaxNum; i++)
-            {
-                m_ThreadShutdown.Add(false);
-
-                RECORD2 aObj = new RECORD2();
-                aObj.ShutdownIndex = i;
-                aObj.Handle        = ThreadHelper.Start(ThreadFuncWork, i);
-                
-                m_ThreadArrary.Add(aObj);
-            }
+            SetPoolSize(iTreadMaxNum);
         }
-        
+
         /// <summary>
         /// 添加新事件
         /// </summary>
         public void AddWork(EventFunc Func, object[] data)
         {
-            RECORD aObj = new RECORD() { Func = Func, data = data };
+            WorkItem aObj = new WorkItem() { Func = Func, data = data };
             m_Queue.Enqueue(aObj);
         }
 
@@ -296,17 +296,17 @@ namespace AIGS.Helper
         public void CloseAll(bool bIsImmediately = false)
         {
             for (int i = 0; i < m_ThreadShutdown.Count; i++)
-                m_ThreadShutdown[i] = true;
+                m_ThreadArrary[i].Shutdown = true;
+
             if (bIsImmediately)
             {
-                try
-                {
-                    for (int i = 0; i < m_ThreadArrary.Count; i++)
-                        m_ThreadArrary[i].Handle.Abort();
-                }
-                catch { }
+                for (int i = 0; i < m_ThreadArrary.Count; i++)
+                    ThreadHelper.Abort(m_ThreadArrary[i].Handle);
+                for (int i = 0; i < m_ThreadShutdown.Count; i++)
+                    ThreadHelper.Abort(m_ThreadShutdown[i].Handle);
             }
             m_ThreadArrary.Clear();
+            m_ThreadShutdown.Clear();
         }
 
         /// <summary>
@@ -320,33 +320,34 @@ namespace AIGS.Helper
         /// <summary>
         /// 设置线程池大小
         /// </summary>
-        /// <param name="iSize"></param>
-        public void SetPoolSize(int iSize)
+        /// <param name="iNewSize"></param>
+        public void SetPoolSize(int iNewSize)
         {
-            int iCmpSize = iSize - m_ThreadArrary.Count;
-            if (iCmpSize == 0)
+            if (iNewSize < 0)
                 return;
-            if (iCmpSize > 0)
-            {
-                for (int i = 0; i < iCmpSize; i++)
-                {
-                    m_ThreadShutdown.Add(false);
-                    RECORD2 aObj       = new RECORD2();
-                    aObj.ShutdownIndex = m_ThreadShutdown.Count - 1;
-                    aObj.Handle        = ThreadHelper.Start(ThreadFuncWork, aObj.ShutdownIndex);
 
-                    m_ThreadArrary.Add(aObj);
+            int iIncreaseNum = iNewSize - m_ThreadArrary.Count;
+            if (iIncreaseNum == 0)
+                return;
+            if (iIncreaseNum > 0)
+            {
+                for (int i = 0; i < iIncreaseNum; i++)
+                {
+                    ThreadItem aRecord = new ThreadItem();
+                    aRecord.Index      = m_ThreadArrary.Count;
+                    aRecord.Shutdown   = false;
+                    aRecord.Handle     = ThreadHelper.Start(ThreadFuncWork, aRecord.Index);
+                    m_ThreadArrary.Add(aRecord);
                 }
             }
-            else
+            if (iIncreaseNum < 0)
             {
-                while(iCmpSize < 0)
+                for (int i = 0; i > iIncreaseNum; i--)
                 {
-                    RECORD2 aObj = m_ThreadArrary[m_ThreadArrary.Count - 1];
-                    m_ThreadShutdown[aObj.ShutdownIndex] = true;
+                    ThreadItem aRecord = m_ThreadArrary[m_ThreadArrary.Count - 1];
+                    aRecord.Shutdown   = true;
+                    m_ThreadShutdown.Add(aRecord);
                     m_ThreadArrary.RemoveAt(m_ThreadArrary.Count - 1);
-
-                    iCmpSize++;
                 }
             }
         }
@@ -356,30 +357,33 @@ namespace AIGS.Helper
         /// </summary>
         private void ThreadFuncWork(object[] data)
         {
-            RECORD aObj      = null;
-            int iStatusIndex = (int)data[0];
+            int iIndex       = (int)data[0];
+            WorkItem aRecord = null;
+            
+            Thread.Sleep(500);
             while (true)
             {
-                if (m_ThreadShutdown[iStatusIndex])
+                if (m_ThreadArrary[iIndex].Shutdown)
                     return;
+
                 try
                 {
-                    if(m_Queue.Count > 0)
-                        aObj = (RECORD)m_Queue.Dequeue();
+                    if (m_Queue.Count <= 0)
+                        goto POINT_SLEEP;
+
+                    aRecord = null;
+                    aRecord = (WorkItem)m_Queue.Dequeue();
+                    if (aRecord == null)
+                        goto POINT_SLEEP;
+                    aRecord.Func(aRecord.data);
+                    continue;
                 }
                 catch{}
 
-                if(aObj == null)
-                {
-                    Thread.Sleep(1000);
-                    continue;
-                }
-                
-                aObj.Func(aObj.data);
-                aObj = null;
+            POINT_SLEEP:
+                Thread.Sleep(1000);
             }
         }
-
     }
 
 }
