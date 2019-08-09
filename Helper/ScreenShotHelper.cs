@@ -179,7 +179,7 @@ namespace AIGS.Helper
         /// </summary>
         Form m_CutForm = new Form();
         Button m_ButOK = new Button();
-        Button m_ButCancle = new Button();
+        Button m_ButCancel = new Button();
 
         /// <summary>
         /// 用来记录鼠标按下的坐标，用来确定绘图起点
@@ -246,7 +246,7 @@ namespace AIGS.Helper
             //设置按钮
             InitCutBut();
             m_CutForm.Controls.Add(m_ButOK);
-            m_CutForm.Controls.Add(m_ButCancle);
+            m_CutForm.Controls.Add(m_ButCancel);
 
             //确定按钮响应
             m_FuncOk = aFunc;
@@ -365,15 +365,15 @@ namespace AIGS.Helper
             m_ButOK.UseVisualStyleBackColor = true;
             m_ButOK.Click += new System.EventHandler(Event_ButOkClick);
 
-            m_ButCancle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            m_ButCancle.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            m_ButCancle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            m_ButCancle.Location = new System.Drawing.Point(641, 112);
-            m_ButCancle.Name = "m_ButCancle";
-            m_ButCancle.Size = new System.Drawing.Size(75, 23);
-            m_ButCancle.Text = "取消";
-            m_ButCancle.BackColor = Color.LightSkyBlue;
-            m_ButCancle.UseVisualStyleBackColor = true;
+            m_ButCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            m_ButCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            m_ButCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            m_ButCancel.Location = new System.Drawing.Point(641, 112);
+            m_ButCancel.Name = "m_ButCancle";
+            m_ButCancel.Size = new System.Drawing.Size(75, 23);
+            m_ButCancel.Text = "取消";
+            m_ButCancel.BackColor = Color.LightSkyBlue;
+            m_ButCancel.UseVisualStyleBackColor = true;
 
         }
 
@@ -384,7 +384,7 @@ namespace AIGS.Helper
         private void SetCutButVisible(bool bFlag)
         {
             m_ButOK.Visible = bFlag;
-            m_ButCancle.Visible = bFlag;
+            m_ButCancel.Visible = bFlag;
         }
 
         /// <summary>
@@ -419,9 +419,9 @@ namespace AIGS.Helper
             int YOK = iButY;
             m_ButOK.Location = new System.Drawing.Point(XOK, YOK);
 
-            int XCancle = iButX + 75 + 2;
-            int YCancle = iButY;
-            m_ButCancle.Location = new System.Drawing.Point(XCancle, YCancle);
+            int XCancel = iButX + 75 + 2;
+            int YCancel = iButY;
+            m_ButCancel.Location = new System.Drawing.Point(XCancel, YCancel);
         }
 
         /// <summary>
