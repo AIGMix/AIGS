@@ -272,7 +272,9 @@ namespace AIGS.Helper
         /// </summary>
         /// <param name="sString"></param>
         /// <returns>
-        /// (sizeof(sString[]) == 1) ==> "n"    (sizeof(sString[]) == 2) ==> "n1 & n2"    (sizeof(sString[]) > 2) ==> "n1, n2, nx, & nx"
+        /// (sString[].Length == 1) ==> "n"    
+        /// (sString[].Length == 2) ==> "n1 & n2"    
+        /// (sString[].Length > 2) ==> "n1, n2, nx, & nx"
         /// </returns>
         public static string PrettyFormatArray(string[] sString)
         {
