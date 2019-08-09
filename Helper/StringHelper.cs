@@ -30,7 +30,7 @@ namespace AIGS.Helper
         /// </summary>
         /// <param name="sStr"></param>
         /// <returns></returns>
-        public static bool IsEnglisth(string sStr)
+        public static bool IsEnglish(string sStr)
         {
             string text = sStr;
             for (int i = 0; i < text.Length; i++)
@@ -265,6 +265,32 @@ namespace AIGS.Helper
             }
 
             return sRet;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sString"></param>
+        /// <returns>
+        /// sizeof(sString[]) = 1 = n    sizeof(sString[]) = 2 = n1 & n2    sizeof(sString[]) > 2 = "n1, n2, nx, & nx"
+        /// </returns>
+        public static string PrettyFormatArray(string[] sString)
+        {
+            if (sString.Length == 1)
+            {
+                return sString[0];
+            }
+            var sb = new StringBuilder();
+            var last = sString.Length - 1;
+            for (var i = 0; i < sString.Length; i++)
+            {
+                sb.Append(sString[i]);
+                if (i != last)
+                {
+                    sb.Append((last - 1 != i) ? ", " : " & ");
+                }
+            }
+            return sb.ToString();
         }
     }
 }
