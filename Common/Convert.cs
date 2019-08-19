@@ -346,9 +346,10 @@ namespace AIGS.Common
         public static int ConverStringToInt(string sValue, int iDefault = 0)
         {
             int iRet = iDefault;
-            int.TryParse(sValue, out iRet);
+            if (int.TryParse(sValue, out iRet))
+                return iRet;
 
-            return iRet;
+            return iDefault;
         }
 
         public static int[] ConverStringsToInts(string[] sArray, int iDefault = 0)

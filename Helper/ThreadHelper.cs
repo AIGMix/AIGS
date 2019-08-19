@@ -275,7 +275,9 @@ namespace AIGS.Helper
         /// </summary>
         private List<ThreadItem> m_ThreadArrary   = new List<ThreadItem>();
         private List<ThreadItem> m_ThreadShutdown = new List<ThreadItem>();
-        private Queue<WorkItem> m_Queue           = new Queue<WorkItem>();
+        private Queue<WorkItem>  m_Queue          = new Queue<WorkItem>();
+        private object           m_Lock           = new object();
+        private Semaphore        m_Sema           = new Semaphore(0, 10000);
         public ThreadPoolManager(int iTreadMaxNum = 5)
         {
             SetPoolSize(iTreadMaxNum);
@@ -287,7 +289,11 @@ namespace AIGS.Helper
         public void AddWork(EventFunc Func, object[] data)
         {
             WorkItem aObj = new WorkItem() { Func = Func, data = data };
-            m_Queue.Enqueue(aObj);
+            lock (m_Lock)
+            {
+                m_Sema.Release();
+                m_Queue.Enqueue(aObj);
+            }
         }
 
         /// <summary>
@@ -368,11 +374,15 @@ namespace AIGS.Helper
 
                 try
                 {
-                    if (m_Queue.Count <= 0)
-                        goto POINT_SLEEP;
+                    //if (m_Queue.Count <= 0)
+                    //    goto POINT_SLEEP;
 
                     aRecord = null;
-                    aRecord = (WorkItem)m_Queue.Dequeue();
+                    m_Sema.WaitOne();
+                    lock (m_Lock)
+                    {
+                        aRecord = (WorkItem)m_Queue.Dequeue();
+                    }
                     if (aRecord == null)
                         goto POINT_SLEEP;
                     aRecord.Func(aRecord.data);

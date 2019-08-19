@@ -90,9 +90,10 @@ namespace AIGS.Helper
                                   int Timeout                         = 5 * 1000,
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
-                                  bool bOnlyGetSize                   = false)
+                                  bool bOnlyGetSize                   = false,
+                                  bool bAppendFile                    = false)
         {
-            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize);
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile);
             return oBj.Result;
         }
 
@@ -119,7 +120,8 @@ namespace AIGS.Helper
                                   int Timeout                         = 5 * 1000,
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
-                                  bool bOnlyGetSize                   = false)
+                                  bool bOnlyGetSize                   = false,
+                                  bool bAppendFile                    = false)
         {
             return Task.Run(() =>
             {
@@ -137,6 +139,7 @@ namespace AIGS.Helper
                 RETRY_ENTRY:
                 try
                 {
+                    bool bRet = false;
                     ServicePointManager.Expect100Continue = false;
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sUrl);
@@ -156,14 +159,15 @@ namespace AIGS.Helper
                     //创建目录
                     string pDir = Path.GetDirectoryName(sPath);
                     PathHelper.Mkdirs(pDir);
-                    if(File.Exists(sPath))
+
+                    if(File.Exists(sPath) && !bAppendFile)
                         File.Delete(sPath);
 
                     //打开文件
                     Stream myResponseStream = response.GetResponseStream();
                     //一分钟超时
                     myResponseStream.ReadTimeout = 60000;
-                    System.IO.Stream pFD = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
+                    System.IO.Stream pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
 
                     //如果走到这里的话，就不能重试了，要不如进度会出错
                     RetryNum = 0;
@@ -185,11 +189,12 @@ namespace AIGS.Helper
                     {
                         CompleteMothed(lTotalSize, data);
                     }
+                    bRet = true;
 
                     RETURN_POINT:
                     pFD.Close();
                     myResponseStream.Close();
-                    return true;
+                    return bRet;
                 }
                 catch (System.Exception e)
                 {

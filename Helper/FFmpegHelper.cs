@@ -37,7 +37,7 @@ namespace AIGS.Helper
                 {
                     FileHelper.Write("file \'" + item + "\'\n", false, sTmpPath + "\\" + sFileName + "TMP.txt");
                 }
-
+                
                 //删除旧文件
                 if (File.Exists(sToFilePath))
                     File.Delete(sToFilePath);
@@ -62,6 +62,49 @@ namespace AIGS.Helper
             {
                 return false;
             }
+        }
+
+        public static bool Convert(string sSrcFile, string sDescFile)
+        {
+            sSrcFile  = Path.GetFullPath(sSrcFile);
+            sDescFile = Path.GetFullPath(sDescFile);
+            if (!File.Exists(sSrcFile))
+                return false;
+            if (File.Exists(sDescFile))
+                File.Delete(sDescFile);
+
+            string sFFmpegPath = "ffmpeg.exe";
+            string sCmd = "-i \"" + sSrcFile + "\" -c copy \"" + sDescFile + "\"";
+            int exitCode = CmdHelper.StartExe(sFFmpegPath, sCmd, IsShowWindow: false, IsWatiForExit: true);
+            return exitCode == 0;
+        }
+
+        public static bool IsExist()
+        {
+            string sCom = "ffmpeg -V&exit";
+            Process p                          = new Process();  //设置要启动的应用程序
+            p.StartInfo.FileName               = "cmd.exe";      //是否使用操作系统shell启动
+            p.StartInfo.UseShellExecute        = false;          //接受来自调用程序的输入信息
+            p.StartInfo.RedirectStandardInput  = true;           //输出信息
+            p.StartInfo.RedirectStandardOutput = true;           //输出错误
+            p.StartInfo.RedirectStandardError  = true;           //不显示程序窗口
+            p.StartInfo.CreateNoWindow         = true;           //启动程序
+            p.Start();
+            p.StandardInput.WriteLine(sCom);
+            p.StandardInput.AutoFlush = true;   
+
+            StreamReader reader = p.StandardOutput;
+            StreamReader error  = p.StandardError;
+            string sOutput      = reader.ReadToEnd() + error.ReadToEnd();
+            p.WaitForExit();
+            p.Close();
+
+            if (sOutput.IsBlank())
+                return false;
+            sOutput = sOutput.Substring(sOutput.IndexOf(sCom) + sCom.Length).ToLower();
+            if (sOutput.IndexOf("version") > 0 && sOutput.IndexOf("copyright") > 0)
+                return true;
+            return false;
         }
     }
 }

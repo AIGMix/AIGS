@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AIGS.Common;
 namespace AIGS.Helper
 {
-    public class githubHelper
+    public class GithubHelper
     {
         /// <summary>
         /// 获取最新的版本
