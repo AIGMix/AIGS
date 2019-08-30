@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace AIGS.Common
@@ -124,5 +127,59 @@ namespace AIGS.Common
         }
     }
 
+    /// <summary>
+    /// not empty -> Visibility
+    /// </summary>
+    public class NotEmptyToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value != null)
+                    return Visibility.Visible;
+                return Visibility.Hidden;
+            }
+            catch { return Visibility.Hidden; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+    /// <summary>
+    /// empty -> Visibility
+    /// </summary>
+    public class EmptyToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value == null)
+                    return Visibility.Visible;
+                return Visibility.Hidden;
+            }
+            catch { return Visibility.Hidden; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+
+    public class RowHeaderToIndexConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            DataGridRow row = value as DataGridRow;
+            return row.GetIndex() + 1;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 

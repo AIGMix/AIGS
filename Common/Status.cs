@@ -8,7 +8,6 @@ namespace AIGS.Common
 {
     public enum Status
     {
-        
         Err = -1,
         Success = 0,
         Wait = 1,

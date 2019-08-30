@@ -52,33 +52,6 @@ namespace AIGS.Helper
         #endregion
 
         #region 配置文件基本Key值读写
-
-        ///// <summary>
-        ///// 查询配置文件的值(STRING)
-        ///// </summary>
-        ///// <param name="sKey">关键字</param>
-        ///// <param name="sGroup">组</param>
-        ///// <param name="sConfigPath">配置文件地址</param>
-        ///// <returns></returns>
-        //public static string GetValue(string sKey, string sGroup = null, string sConfigPath = null)
-        //{
-        //    if (String.IsNullOrWhiteSpace(sKey))
-        //        return "";
-
-        //    //设置配置名
-        //    if (String.IsNullOrWhiteSpace(sConfigPath))
-        //        sConfigPath = GetDefaultPathName();
-
-        //    if (String.IsNullOrWhiteSpace(sGroup))
-        //        sGroup = "";
-
-        //    //读取相应值
-        //    StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
-        //    GetPrivateProfileString(sGroup, sKey, "", sValue, MAX_VALUE_LEN, sConfigPath);
-
-        //    return sValue.ToString();
-        //}
-
         /// <summary>
         /// 查询配置文件的值(STRING)
         /// </summary>
@@ -101,7 +74,6 @@ namespace AIGS.Helper
             //读取相应值
             StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
             GetPrivateProfileString(sGroup, sKey, sDefault, sValue, MAX_VALUE_LEN, sConfigPath);
-
             return sValue.ToString();
         }
 
@@ -166,7 +138,6 @@ namespace AIGS.Helper
                 if (bool.TryParse(sValue, out bRet))
                     return bRet;
             }
-
             return bDefault;
         }
 
@@ -185,10 +156,8 @@ namespace AIGS.Helper
             //设置配置名
             if (String.IsNullOrWhiteSpace(sConfigPath))
                 sConfigPath = GetDefaultPathName();
-
             if (String.IsNullOrWhiteSpace(sGroup))
                 sGroup = "";
-
             if (String.IsNullOrWhiteSpace(sValue))
                 sValue = "";
 

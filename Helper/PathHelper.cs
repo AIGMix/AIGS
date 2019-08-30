@@ -8,7 +8,6 @@ namespace AIGS.Helper
 {
     public class PathHelper
     {
-
         /// <summary>
         /// 是否为相对路径
         /// </summary>

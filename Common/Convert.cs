@@ -19,7 +19,6 @@ namespace AIGS.Common
         #region IntPtr与其他类型的转换
 
         #region struct<->IntPtr
-
         /// <summary>
         /// 功能描述：根据指针和需要解析的结构体的数量，解析数据指针里面对应的结构体数据
         /// </summary>
@@ -34,9 +33,8 @@ namespace AIGS.Common
                 IntPtr ipOneOfT;
                 T[] aRetStructs = new T[iNum];
                 if (iNum <= 0)
-                {
                     return aRetStructs;
-                }
+
                 int iSizeOfStruct = Marshal.SizeOf(typeof(T));
                 byte[] byBuffer = new byte[iNum * iSizeOfStruct];
                 Marshal.Copy(in_pStructure, byBuffer, 0, byBuffer.Length);
@@ -60,9 +58,6 @@ namespace AIGS.Common
             return pRet[0];
         }
 
-
-
-
         /// <summary>
         ///功能描述:将c#里面的托管的结构体转换为非托管的结构体，以指针的形式传入到动态库中调用
         /// <typeparam name="T">模板类型参数</typeparam>
@@ -73,18 +68,15 @@ namespace AIGS.Common
         {
             try
             {
-                IntPtr intPtr;
                 int i = 0;
                 int intSize = Marshal.SizeOf(typeof(T));
-                intPtr = Marshal.AllocHGlobal(intSize * iNum);
+                IntPtr intPtr = Marshal.AllocHGlobal(intSize * iNum);
                 foreach (T var in aStructures)
                 {
                     IntPtr newPtr = new IntPtr(intPtr.ToInt32() + i * intSize);
                     Marshal.StructureToPtr(var, newPtr, false);
                     i++;
                 }
-
-
                 return intPtr;
             }
             catch (Exception exc)
@@ -100,7 +92,6 @@ namespace AIGS.Common
             IntPtr pTmp = ConvertManageStructToIntPtr<T>(info, 1);
             return pTmp;
         }
-
 
         #endregion
 
@@ -201,7 +192,6 @@ namespace AIGS.Common
             Marshal.Copy(in_pByte, pRet, 0, in_ByteNum);
             return pRet;
         }
-
         #endregion
 
         #region free IntPtr
@@ -271,6 +261,15 @@ namespace AIGS.Common
             }
 
             return result;
+        }
+
+        public static List<int> ConverEnumToList(Type enumType)
+        {
+            Dictionary<int, string> pHash = ConverEnumToDictionary(enumType);
+            List<int> pRet = new List<int>();
+            for (int i = 0; i < pHash.Count; i++)
+                pRet.Add(pHash.ElementAt(i).Key);
+            return pRet;
         }
 
         /// <summary>
@@ -428,7 +427,6 @@ namespace AIGS.Common
             IntPtr.Zero,
             Int32Rect.Empty,
             BitmapSizeOptions.FromEmptyOptions());
-
             return wpfBitmap;
         }
 
@@ -502,6 +500,4 @@ namespace AIGS.Common
         }
         #endregion
     }
-
-    
 }

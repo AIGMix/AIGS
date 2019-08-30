@@ -219,8 +219,6 @@ namespace AIGS.Helper
 
             return pRet;
         }
-
-
         #endregion
     }
 }

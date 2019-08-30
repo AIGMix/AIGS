@@ -11,9 +11,9 @@ namespace AIGS.Helper
     {
         string TEST_URL = @"http://speedtest-sfo2.digitalocean.com/10mb.test";
 
-        bool FirstTime;
+        bool   FirstTime;
         double DownloadSpeed;
-        int CurPro;
+        int    CurPro;
         DateTime StartTime;
         UpdateProgressNotify pProgress;
 
@@ -57,7 +57,6 @@ namespace AIGS.Helper
                 catch { }
             }
         }
-
 
         /// <summary>
         /// 开始前的准备
