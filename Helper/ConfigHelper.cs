@@ -9,6 +9,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -222,8 +223,39 @@ namespace AIGS.Helper
             string sRet = sPath + "\\" + sExeName + ".ini";
             return sRet;
         }
-
-
         #endregion
+
+        public static Dictionary<string, List<string>> ParseNoEqual(string sFilePath)
+        {
+            Dictionary<string, List<string>> pRet = new Dictionary<string, List<string>>();
+            if(!File.Exists(sFilePath))
+                return pRet;
+
+            string[] sArr = FileHelper.ReadLines(sFilePath);
+            string sGroup = null;
+            List<string> sList = null;
+            foreach (string item in sArr)
+            {
+                string sBuf = item.Trim();
+                if (sBuf.Length <= 0 || sBuf[0] == '#')
+                    continue;
+                else if (sBuf[0] == '[' && sBuf[1] == ']')
+                {
+                    if(sGroup != null && !pRet.ContainsKey(sGroup))
+                        pRet.Add(sGroup, sList);
+
+                    sGroup = sBuf.Substring(0, sBuf.Length - 2);
+                    sList = new List<string>();
+                }
+                else if (sBuf == null)
+                    continue;
+                else
+                    sList.Add(sBuf);
+            }
+            if (sGroup != null && !pRet.ContainsKey(sGroup))
+                pRet.Add(sGroup, sList);
+            return pRet;
+        }
+
     }
 }
