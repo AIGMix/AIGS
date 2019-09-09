@@ -33,6 +33,17 @@ namespace AIGS.Common
         {
             return StringHelper.IsEnglisth(str);
         }
+        public static string ToPassword(this string str, bool equalLen = false)
+        {
+            if (str.IsBlank())
+                return "";
+            if (!equalLen)
+                return "●●●●●●";
+            string sret = "";
+            for (int i = 0; i < str.Length; i++)
+                sret += "●";
+            return sret;
+        }
 
         /// <summary>
         /// 去除数字

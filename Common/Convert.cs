@@ -246,6 +246,32 @@ namespace AIGS.Common
         #endregion
 
         #region enum->Hash<int,string>
+
+        public static Dictionary<string, string> ConverStringToEnum(string sString, string sSplitRecord=",", string sSplitKeyValue="#")
+        {
+            sString = sString.Trim();
+            if (sString.IsBlank())
+                return null;
+            try
+            {
+                Dictionary<string, string> pRet = new Dictionary<string, string>();
+                string[] sItems = sString.Split(sSplitRecord);
+                foreach (string item in sItems)
+                {
+                    string[] sRecord = item.Split(sSplitKeyValue);
+                    if (sRecord.Count() != 2)
+                        return null;
+                    pRet.Add(sRecord[0], sRecord[1]);
+                }
+                return pRet;
+            }
+            catch
+            {
+                return null;
+            }
+
+        }
+
         /// <summary>
         /// 枚举转字典
         /// </summary>
