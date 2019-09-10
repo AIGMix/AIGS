@@ -23,6 +23,32 @@ namespace AIGS.Helper
     {
         #region 静态方法
 
+        static System.Windows.Rect NormalRect = new System.Windows.Rect();
+
+        /// <summary>
+        /// 最大化窗口
+        /// </summary>
+        public static void MaxWindow(System.Windows.Window form)
+        {
+            if (NormalRect == null || (NormalRect.Width == 0 && NormalRect.Height == 0))
+            {
+                NormalRect = new System.Windows.Rect(form.Left, form.Top, form.Width, form.Height);//保存下当前位置与大小
+                System.Windows.Rect rc = System.Windows.SystemParameters.WorkArea;//获取工作区大小
+                form.Left = 0;//设置位置
+                form.Top = 0;
+                form.Width = rc.Width;
+                form.Height = rc.Height;
+            }
+            else
+            {
+                form.Left = NormalRect.Left;
+                form.Top = NormalRect.Top;
+                form.Width = NormalRect.Width;
+                form.Height = NormalRect.Height;
+                NormalRect = new System.Windows.Rect();
+            }
+        }
+
         /// <summary>
         /// 截取显示器屏幕
         /// </summary>
