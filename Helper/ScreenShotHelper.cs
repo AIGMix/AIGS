@@ -23,8 +23,10 @@ namespace AIGS.Helper
     {
         #region 静态方法
 
+        /// <summary>
+        /// 原始窗口的大小
+        /// </summary>
         static System.Windows.Rect NormalRect = new System.Windows.Rect();
-
         /// <summary>
         /// 最大化窗口
         /// </summary>

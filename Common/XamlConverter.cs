@@ -169,7 +169,7 @@ namespace AIGS.Common
     }
 
     /// <summary>
-    /// empty -> Visibility
+    /// bool -> Visibility
     /// </summary>
     public class BoolToVisibilityConverter : IValueConverter
     {
