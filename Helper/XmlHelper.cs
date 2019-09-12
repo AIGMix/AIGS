@@ -145,7 +145,7 @@ namespace AIGS.Helper
 
             return aNode.InnerText;
         }
-
+        
         /// <summary>
         /// 获取属性
         /// </summary>

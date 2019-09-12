@@ -73,7 +73,6 @@ namespace AIGS.Common
             var format = NumberFormatInfo.InvariantInfo;
             int result = defaultValue;
             int.TryParse(str, styles, format, out result);
-            //return Convert.ConverStringToInt(str, defaultValue);
             return result;
         }
         public static long ParseLong(this string str, long defaultValue = default(long))
@@ -144,7 +143,7 @@ namespace AIGS.Common
                     yield return element;
             }
         }
-
+   
         #region BitmapImage
         public static BitmapImage ToBitmapImage(this byte[] sByteArray)
         {

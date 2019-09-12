@@ -14,7 +14,7 @@ using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using AIGS.Common;
 namespace AIGS.Helper
 {
     public class ConfigHelper
@@ -225,13 +225,30 @@ namespace AIGS.Helper
         }
         #endregion
 
-        public static Dictionary<string, List<string>> ParseNoEqual(string sFilePath)
+        /// <summary>
+        /// 解析配置文件，文件中的项只有值
+        /// </summary>
+        /// <param name="sFilePath"></param>
+        /// <param name="sByFileContent"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> ParseNoEqual(string sFilePath, string sByFileContent=null)
         {
             Dictionary<string, List<string>> pRet = new Dictionary<string, List<string>>();
-            if(!File.Exists(sFilePath))
-                return pRet;
 
-            string[] sArr = FileHelper.ReadLines(sFilePath);
+            string[] sArr;
+            if (sFilePath != null && !sFilePath.IsBlank())
+            {
+                if (!File.Exists(sFilePath))
+                    return pRet;
+                sArr = FileHelper.ReadLines(sFilePath);
+            }
+            else
+            {
+                if (sByFileContent == null || sByFileContent.IsBlank())
+                    return pRet;
+                sArr = sByFileContent.Split('\n');
+            }
+            
             string sGroup = null;
             List<string> sList = null;
             foreach (string item in sArr)
@@ -239,15 +256,15 @@ namespace AIGS.Helper
                 string sBuf = item.Trim();
                 if (sBuf.Length <= 0 || sBuf[0] == '#')
                     continue;
-                else if (sBuf[0] == '[' && sBuf[1] == ']')
+                else if (sBuf[0] == '[' && sBuf[sBuf.Length - 1] == ']')
                 {
                     if(sGroup != null && !pRet.ContainsKey(sGroup))
                         pRet.Add(sGroup, sList);
 
-                    sGroup = sBuf.Substring(0, sBuf.Length - 2);
+                    sGroup = sBuf.Substring(1, sBuf.Length - 2);
                     sList = new List<string>();
                 }
-                else if (sBuf == null)
+                else if (sBuf == null || sList == null)
                     continue;
                 else
                     sList.Add(sBuf);
@@ -256,6 +273,5 @@ namespace AIGS.Helper
                 pRet.Add(sGroup, sList);
             return pRet;
         }
-
     }
 }

@@ -31,7 +31,8 @@ namespace AIGS.Helper
         {
             try
             {
-                Handle.Abort();
+                if(Handle != null)
+                    Handle.Abort();
             }
             catch { }
         }

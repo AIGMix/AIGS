@@ -22,7 +22,7 @@ namespace AIGS.Helper
     public class ScreenShotHelper
     {
         #region 静态方法
-
+        
         /// <summary>
         /// 原始窗口的大小
         /// </summary>
@@ -36,12 +36,12 @@ namespace AIGS.Helper
             {
                 NormalRect = new System.Windows.Rect(form.Left, form.Top, form.Width, form.Height);//保存下当前位置与大小
                 System.Windows.Rect rc = System.Windows.SystemParameters.WorkArea;//获取工作区大小
-                form.Left = 0;//设置位置
-                form.Top = 0;
+                form.Left = 0; //设置位置
+                form.Top = 0;  
                 form.Width = rc.Width;
                 form.Height = rc.Height;
             }
-            else
+            else 
             {
                 form.Left = NormalRect.Left;
                 form.Top = NormalRect.Top;
