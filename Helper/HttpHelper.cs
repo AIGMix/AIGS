@@ -11,7 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using AIGS.Common;
 namespace AIGS.Helper
 {
     public class HttpHelper
@@ -41,6 +41,21 @@ namespace AIGS.Helper
             }
         }
 
+        public class ProxyInfo
+        {
+            public string Host { get; set; }
+            public int Port { get; set; }
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public ProxyInfo(string host, int port, string user=null, string pwd=null)
+            {
+                Host = host;
+                Port = port;
+                Username = user;
+                Password = pwd;
+            }
+        }
+
         public class Record
         {
             public bool   IsHttp { get; set; }
@@ -58,6 +73,7 @@ namespace AIGS.Helper
             public string ContentType { get; set; } 
             public string PostJson { get; set; }
             public Dictionary<string, string> PostParas { get; set; }
+            public ProxyInfo Proxy { get; set; }
 
             public Record()
             {
@@ -87,7 +103,8 @@ namespace AIGS.Helper
                                 string PostJson                     = null,
                                 string Accept                       = null,
                                 string Referer                      = null,
-                                bool EnableAsync                    = true)
+                                bool EnableAsync                    = true,
+                                ProxyInfo Proxy                     = null)
         {
             string Errmsg = null;
             string Errrep = null;
@@ -108,9 +125,9 @@ namespace AIGS.Helper
                 request.KeepAlive       = KeepAlive;
                 request.CookieContainer = Cookie == null ? new CookieContainer() : Cookie;
                 request.UserAgent       = UserAgent;
-                request.Proxy           = null;
                 request.Accept          = Accept;
-                request.Referer         = Referer; 
+                request.Referer         = Referer;
+                request.Proxy           = null;
 
                 if (ElseMethod != null)
                     request.Method = ElseMethod;
@@ -120,6 +137,16 @@ namespace AIGS.Helper
                 {
                     request.Headers = new WebHeaderCollection();
                     request.Headers.Add(Header);
+                }
+
+                if (Proxy != null && Proxy.Host.IsNotBlank() && Proxy.Port >= 0)
+                {
+                    WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
+                    if(Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
+                        myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
+
+                    request.Proxy = myProxy;
+                    request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 }
 
                 //装载要POST数据  
@@ -223,7 +250,8 @@ namespace AIGS.Helper
                                         ElseMethod:Obj.Method,
                                         PostJson:Obj.PostJson,
                                         Accept:Obj.Accept,
-                                        Referer:Obj.Referer);
+                                        Referer:Obj.Referer,
+                                        Proxy:Obj.Proxy);
         }
 
         #region get/post
@@ -241,11 +269,12 @@ namespace AIGS.Helper
                                 string  Header                      = null,
                                 string  ElseMethod                  = null,
                                 string  PostJson                    = null,
-                                bool    IsErrResponse               = false)
+                                bool    IsErrResponse               = false,
+                                ProxyInfo Proxy                     = null)
         {
             try
             {
-                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false);
+                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false, Proxy:Proxy);
                 Errmsg = Res.Result.Errmsg;
                 if (IsErrResponse)
                     Errmsg = Res.Result.Errresponse;
@@ -287,9 +316,10 @@ namespace AIGS.Helper
                                             string  UserAgent      = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                             string  ContentType    = "application/x-www-form-urlencoded; charset=UTF-8",
                                             int     Retry          = 0,
-                                            CookieContainer Cookie = null)
+                                            CookieContainer Cookie = null,
+                                            ProxyInfo Proxy        = null)
         {
-            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, null);
+            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, null, Proxy: Proxy);
             if (oValue == null)
                 return default(T);
             
@@ -311,12 +341,12 @@ namespace AIGS.Helper
                                     string  UserAgent      = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                     string  ContentType    = "application/x-www-form-urlencoded; charset=UTF-8",
                                     int     Retry          = 0,
-                                    CookieContainer Cookie = null)
+                                    CookieContainer Cookie = null,
+                                    ProxyInfo Proxy = null)
         {
-            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, null);
+            object oValue = GetOrPost(sUrl, out Errmsg, null, false, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, null, Proxy: Proxy);
             if (oValue == null)
                 return false;
-
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(sPath));
@@ -332,10 +362,6 @@ namespace AIGS.Helper
         }
 
         #endregion
-
-        
-
-        
     }
 
 

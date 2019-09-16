@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using AIGS.Common;
 namespace AIGS.Helper
 {
     public class PathHelper
@@ -102,7 +102,6 @@ namespace AIGS.Helper
         {
             if (String.IsNullOrWhiteSpace(sPath))
                 return sPath;
-
             sPath = sPath.Replace(":", sReplaceChar);
             sPath = sPath.Replace("/", sReplaceChar);
             sPath = sPath.Replace("?", sReplaceChar);
@@ -112,7 +111,6 @@ namespace AIGS.Helper
             sPath = sPath.Replace("\\", sReplaceChar);
             sPath = sPath.Replace("*", sReplaceChar);
             sPath = sPath.Replace("\"", sReplaceChar);
-
             return sPath;
         }
 
@@ -142,6 +140,8 @@ namespace AIGS.Helper
         /// <returns></returns>
         public static bool Mkdirs(string sPath)
         {
+            if (sPath.IsBlank())
+                return false;
             if(Directory.Exists(sPath))
                 return true;
             

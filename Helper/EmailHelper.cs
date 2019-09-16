@@ -9,6 +9,5 @@ namespace AIGS.Helper
     public class EmailHelper
     {
         //private EmailAccount accountInfo = new EmailAccount();
-
     }
 }

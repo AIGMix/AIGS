@@ -19,7 +19,6 @@ namespace AIGS.Helper
                 var di = new DirectoryInfo(Path.GetDirectoryName(sFilePath));
                 if (!di.Exists)
                     di.Create();
-
                 StreamWriter FD = new StreamWriter(sFilePath, IsClearBeforeWrite ? false : true);
                 FD.Write(sContent);
                 FD.Flush();
@@ -42,7 +41,6 @@ namespace AIGS.Helper
                 var di = new DirectoryInfo(Path.GetDirectoryName(sFilePath));
                 if (!di.Exists)
                     di.Create();
-
                 FileStream FD = new FileStream(sFilePath, IsClearBeforeWrite ? FileMode.Create : FileMode.Append);
                 FD.Write(sContent, 0, sContent.Length);
                 FD.Flush();
