@@ -8,7 +8,7 @@ using System.Net;
 using System.IO;
 using System.Windows;
 using System.Threading.Tasks;
-
+using AIGS.Common;
 namespace AIGS.Helper
 {
     public class DownloadFileHepler
@@ -91,9 +91,10 @@ namespace AIGS.Helper
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false,
-                                  bool bAppendFile                    = false)
+                                  bool bAppendFile                    = false,
+                                  HttpHelper.ProxyInfo Proxy          = null)
         {
-            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile);
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy);
             return oBj.Result;
         }
 
@@ -121,11 +122,11 @@ namespace AIGS.Helper
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false,
-                                  bool bAppendFile                    = false)
+                                  bool bAppendFile                    = false,
+                                  HttpHelper.ProxyInfo Proxy          = null)
         {
             return Task.Run(() =>
             {
-
                 UpdateDownloadNotify UpdateMothed = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
                 CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
                 ErrDownloadNotify ErrMothed = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
@@ -149,6 +150,16 @@ namespace AIGS.Helper
                     //request.KeepAlive       = true;
                     request.UserAgent = UserAgent;
                     request.Proxy = null;
+
+                    if (Proxy != null && Proxy.Host.IsNotBlank() && Proxy.Port >= 0)
+                    {
+                        WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
+                        if (Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
+                            myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
+
+                        request.Proxy = myProxy;
+                        request.Credentials = CredentialCache.DefaultNetworkCredentials;
+                    }
 
                     //开始请求
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();

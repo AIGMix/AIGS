@@ -29,7 +29,7 @@ namespace AIGS.Helper
         }
 
         public delegate bool ProgressNotify(long lCurSize, long lAllSize);
-        public static bool Download(string[] pTsUrls, string sOutFile, ProgressNotify pFunc)
+        public static bool Download(string[] pTsUrls, string sOutFile, ProgressNotify pFunc, HttpHelper.ProxyInfo Proxy = null)
         {
             if (pTsUrls == null || pTsUrls.Count() <= 0)
                 return false;
@@ -46,7 +46,7 @@ namespace AIGS.Helper
                 bool bRet = true;
                 for (int j = 0; j < 100; j++)
                 {
-                    bRet = (bool)DownloadFileHepler.Start(pTsUrls[i], sOutFile, bAppendFile: true, Timeout: 3 * 1000);
+                    bRet = (bool)DownloadFileHepler.Start(pTsUrls[i], sOutFile, bAppendFile: true, Timeout: 3 * 1000, Proxy: Proxy);
                     if (!pFunc(i, iCount))
                         return false;
                     if (bRet)
