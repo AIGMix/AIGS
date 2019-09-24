@@ -30,7 +30,6 @@ namespace AIGS.Helper
         private ManualResetEvent _enqueue_wait = null;
         private ManualResetEvent _dequeue_wait = null;
 
-
         public QueueHelper(int sizeLimit)
         {
             this.SizeLimit     = sizeLimit;
@@ -83,5 +82,4 @@ namespace AIGS.Helper
             this._dequeue_wait.Set();
         }
     }
-
 }

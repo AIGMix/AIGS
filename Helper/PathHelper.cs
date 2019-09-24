@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AIGS.Common;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using AIGS.Common;
 namespace AIGS.Helper
 {
     public class PathHelper

@@ -1,14 +1,7 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using AIGS.Helper;
-using System.Net;
+﻿using AIGS.Common;
 using System.IO;
-using System.Windows;
+using System.Net;
 using System.Threading.Tasks;
-using AIGS.Common;
 namespace AIGS.Helper
 {
     public class DownloadFileHepler
@@ -24,7 +17,7 @@ namespace AIGS.Helper
             }
             catch
             {
-
+                 
             }
             return 0;
         }

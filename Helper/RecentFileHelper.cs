@@ -23,6 +23,11 @@ namespace AIGS.Helper
         /// 配置文件中的最近打开的文件的组名
         /// </summary>
         private const string SIGN_GROUP = "RECENT_FILES";
+
+        /// <summary>
+        /// 默认的最大数量
+        /// </summary>
+        private const int SIGN_MAX_PATH = 30;
         #endregion
 
         /// <summary>
@@ -47,8 +52,8 @@ namespace AIGS.Helper
                 if(pList.Find(s => s.Equals(sPath)) == null)
                     pList.Add(sPath);
             }
-
             return pList;
+
         }
 
 
@@ -71,10 +76,13 @@ namespace AIGS.Helper
         /// <param name="sPath">路径</param>
         /// <param name="iMaxPathNum">路径数量的最大值</param>
         /// <param name="sConfigPath">配置文件路径</param>
-        public static void AddPath(string sPath, int iMaxPathNum, string sConfigPath = null)
+        public static void AddPath(string sPath, int iMaxPathNum = SIGN_MAX_PATH, string sConfigPath = null)
         {
             //获取全部路径
             List<string> pList = GetPaths(sConfigPath);
+
+            if (iMaxPathNum <= 0)
+                iMaxPathNum = SIGN_MAX_PATH;
 
             //将新增的路径放到最前面
             pList.Remove(sPath);
@@ -83,7 +91,7 @@ namespace AIGS.Helper
             //设置到配置文件中
             int iNum = pList.Count();
             ConfigHelper.SetValue(SIGN_FILE_NUM, iNum, SIGN_GROUP, sConfigPath);
-            for (int i = 0; i < iNum; i++)
+            for (int i = 0; i < iNum && i < iMaxPathNum; i++)
             {
                 ConfigHelper.SetValue(SIGN_FILE + i, pList[i], SIGN_GROUP, sConfigPath);
             }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AIGS.Helper
 {
@@ -35,7 +33,7 @@ namespace AIGS.Helper
             string text = sStr;
             for (int i = 0; i < text.Length; i++)
             {
-                if ((int)text[i] > 127)
+                if ((int)text[i] > 127) //由于英文的范围只有在 0-127，所以大于127的为汉子
                     return false;
             }
             return true;
@@ -118,7 +116,7 @@ namespace AIGS.Helper
             else
                 return Char.ToLower(cChar1) == Char.ToLower(cChar2) ? true : false;
         }
-
+        
         /// <summary>
         /// 删除最后一行
         /// </summary>
@@ -261,7 +259,7 @@ namespace AIGS.Helper
                     continue;
 
                 cCmpChr = sString[0];
-                sRet    += sString[i];
+                sRet += sString[i];
             }
 
             return sRet;

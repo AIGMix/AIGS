@@ -86,7 +86,6 @@ namespace AIGS.Helper
                 UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36";
                 ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
             }
-
         }
 
         public static async Task<Result> GetOrPostAsync(string sUrl,
@@ -358,11 +357,7 @@ namespace AIGS.Helper
                 Errmsg = e.Message;
                 return false;
             }
-
         }
-
         #endregion
     }
-
-
 }

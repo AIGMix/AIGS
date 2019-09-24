@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using AIGS.Common;
 
 namespace AIGS.Helper
 {
@@ -22,7 +23,7 @@ namespace AIGS.Helper
         /// <returns></returns>
         public static T ConverStringToObject<T>(string sStr, params string[] sKeyName)
         {
-            if (String.IsNullOrWhiteSpace(sStr))
+            if (sStr.IsBlank())
                 return default(T);
             try
             {

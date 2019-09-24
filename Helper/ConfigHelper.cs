@@ -8,13 +8,12 @@
 *******************************************************/
 #endregion
 
+using AIGS.Common;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using AIGS.Common;
 namespace AIGS.Helper
 {
     public class ConfigHelper
