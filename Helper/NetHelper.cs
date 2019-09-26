@@ -223,9 +223,9 @@ namespace AIGS.Helper
 
         public enum DOWNLOAD_TYPE
         {
-            DATA,
-            STIRNG,
-            FILE,
+            DATA,   //二进制数据块
+            STIRNG, //字符串
+            FILE,   //文件
         }
 
         /// <summary>
@@ -251,7 +251,6 @@ namespace AIGS.Helper
                     var di = new DirectoryInfo(Path.GetDirectoryName(sFilePathName));
                     if (!di.Exists)
                         di.Create();
-
                     aClient.DownloadFile(sUrl, sFilePathName);
                     aRet = 0;
                 }

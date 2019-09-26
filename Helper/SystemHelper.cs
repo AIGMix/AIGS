@@ -344,7 +344,7 @@ namespace AIGS.Helper
         {
             RegistryKey HKCU = Registry.CurrentUser;
             RegistryKey REG = HKCU.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
-
+            
             if (bFlag)
             {
                 if (String.IsNullOrWhiteSpace(sExePath))

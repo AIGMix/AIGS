@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AIGS.Helper
 {
@@ -17,10 +18,17 @@ namespace AIGS.Helper
             string text = sStr;
             for (int i = 0; i < text.Length; i++)
             {
-                if ((int)text[i] <= 127)
+                if (!IsChinese(text[i]))
                     return false;
             }
             return true;
+        }
+
+        public static bool IsChinese(char s)
+        {
+            if ((int)s > 127 && (s >= 0x4e00 && s <= 0x9fbb) && (Regex.IsMatch(s.ToString(), @"[\u4e00-\u9fbb]")))
+                return true;
+            return false;
         }
 
         /// <summary>
