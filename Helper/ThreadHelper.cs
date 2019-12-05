@@ -264,21 +264,16 @@ namespace AIGS.Helper
             public object[] data;
         }
 
-        private class ThreadItem
-        {
-            public Thread Handle;
-            public int    Index;
-            public bool   Shutdown;
-        }
-
         /// <summary>
         /// 线程链表
         /// </summary>
-        private List<ThreadItem> m_ThreadArrary   = new List<ThreadItem>();
-        private List<ThreadItem> m_ThreadShutdown = new List<ThreadItem>();
+        private Dictionary<int, Thread> m_ThreadArrary = new Dictionary<int, Thread>();
+        private List<Thread>     m_ThreadShutdown = new List<Thread>();
         private Queue<WorkItem>  m_Queue          = new Queue<WorkItem>();
         private object           m_Lock           = new object();
+        private object           m_LockArray      = new object();
         private Semaphore        m_Sema           = new Semaphore(0, 10000);
+        private int              m_IDTmp          = 0;
         public ThreadPoolManager(int iTreadMaxNum = 5)
         {
             SetPoolSize(iTreadMaxNum);
@@ -302,18 +297,18 @@ namespace AIGS.Helper
         /// </summary>
         public void CloseAll(bool bIsImmediately = false)
         {
-            for (int i = 0; i < m_ThreadShutdown.Count; i++)
-                m_ThreadArrary[i].Shutdown = true;
-
-            if (bIsImmediately)
+            lock (m_LockArray)
             {
-                for (int i = 0; i < m_ThreadArrary.Count; i++)
-                    ThreadHelper.Abort(m_ThreadArrary[i].Handle);
-                for (int i = 0; i < m_ThreadShutdown.Count; i++)
-                    ThreadHelper.Abort(m_ThreadShutdown[i].Handle);
+                if (bIsImmediately)
+                {
+                    for (int i = 0; i < m_ThreadArrary.Count; i++)
+                        ThreadHelper.Abort(m_ThreadArrary[i]);
+                    for (int i = 0; i < m_ThreadShutdown.Count; i++)
+                        ThreadHelper.Abort(m_ThreadShutdown[i]);
+                }
+                m_ThreadArrary.Clear();
+                m_ThreadShutdown.Clear();
             }
-            m_ThreadArrary.Clear();
-            m_ThreadShutdown.Clear();
         }
 
         /// <summary>
@@ -321,7 +316,10 @@ namespace AIGS.Helper
         /// </summary>
         public int GetPoolSize()
         {
-            return m_ThreadArrary.Count;
+            lock (m_LockArray)
+            {
+                return m_ThreadArrary.Count;
+            }
         }
 
         /// <summary>
@@ -333,28 +331,29 @@ namespace AIGS.Helper
             if (iNewSize < 0)
                 return;
 
-            int iIncreaseNum = iNewSize - m_ThreadArrary.Count;
-            if (iIncreaseNum == 0)
-                return;
-            if (iIncreaseNum > 0)
+            lock (m_LockArray)
             {
-                for (int i = 0; i < iIncreaseNum; i++)
+                int iIncreaseNum = iNewSize - m_ThreadArrary.Count;
+                if (iIncreaseNum == 0)
+                    return;
+                if (iIncreaseNum > 0)
                 {
-                    ThreadItem aRecord = new ThreadItem();
-                    aRecord.Index      = m_ThreadArrary.Count;
-                    aRecord.Shutdown   = false;
-                    aRecord.Handle     = ThreadHelper.Start(ThreadFuncWork, aRecord.Index);
-                    m_ThreadArrary.Add(aRecord);
+                    for (int i = 0; i < iIncreaseNum; i++)
+                    {
+                        int iID = m_IDTmp++;
+                        m_ThreadArrary.Add(iID, ThreadHelper.Start(ThreadFuncWork, iID));
+                    }
                 }
-            }
-            if (iIncreaseNum < 0)
-            {
-                for (int i = 0; i > iIncreaseNum; i--)
+                if (iIncreaseNum < 0)
                 {
-                    ThreadItem aRecord = m_ThreadArrary[m_ThreadArrary.Count - 1];
-                    aRecord.Shutdown   = true;
-                    m_ThreadShutdown.Add(aRecord);
-                    m_ThreadArrary.RemoveAt(m_ThreadArrary.Count - 1);
+                    for (int i = 0; i > iIncreaseNum; i--)
+                    {
+                        int iID = m_ThreadArrary.ElementAt(0).Key;
+                        Thread aRecord = m_ThreadArrary.ElementAt(0).Value;
+
+                        m_ThreadShutdown.Add(aRecord);
+                        m_ThreadArrary.Remove(iID);
+                    }
                 }
             }
         }
@@ -364,35 +363,34 @@ namespace AIGS.Helper
         /// </summary>
         private void ThreadFuncWork(object[] data)
         {
-            int iIndex       = (int)data[0];
+            int iID = (int)data[0];
             WorkItem aRecord = null;
             
             Thread.Sleep(500);
             while (true)
             {
-                if (m_ThreadArrary[iIndex].Shutdown)
-                    return;
+                lock (m_LockArray)
+                {
+                    if (!m_ThreadArrary.ContainsKey(iID))
+                        return;
+                }
 
                 try
                 {
-                    //if (m_Queue.Count <= 0)
-                    //    goto POINT_SLEEP;
+                    if (!m_Sema.WaitOne(1000))
+                        continue;
 
                     aRecord = null;
-                    m_Sema.WaitOne();
                     lock (m_Lock)
                     {
                         aRecord = (WorkItem)m_Queue.Dequeue();
                     }
                     if (aRecord == null)
-                        goto POINT_SLEEP;
+                        continue;
                     aRecord.Func(aRecord.data);
                     continue;
                 }
                 catch{}
-
-            POINT_SLEEP:
-                Thread.Sleep(1000);
             }
         }
     }

@@ -126,7 +126,7 @@ namespace AIGS.Helper
                 request.UserAgent       = UserAgent;
                 request.Accept          = Accept;
                 request.Referer         = Referer;
-                request.Proxy           = null;
+                //request.Proxy           = null;
 
                 if (ElseMethod != null)
                     request.Method = ElseMethod;

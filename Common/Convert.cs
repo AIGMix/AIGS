@@ -282,7 +282,7 @@ namespace AIGS.Common
             Dictionary<int, string> result = new Dictionary<int, string>();
             foreach (int key in Enum.GetValues(enumType))
             {
-                string value = Enum.GetName(enumType, key);
+                string value = Enum.GetName(enumType, key).Replace('_', ' ');
                 result.Add(key, value);
             }
 
@@ -346,6 +346,7 @@ namespace AIGS.Common
                 return iDefaultEnum;
 
             sEnum = iIgnoreUpLower ? sEnum.ToLower() : sEnum;
+            sEnum = sEnum.Replace(' ', '_');
 
             Array aList = Enum.GetValues(enumType);
             foreach (int key in aList)
