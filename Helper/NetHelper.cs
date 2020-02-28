@@ -13,6 +13,8 @@ using System.Web;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Collections.Specialized;
+
 namespace AIGS.Helper
 {
     public class NetHelper
@@ -320,6 +322,37 @@ namespace AIGS.Helper
             aClient.Dispose();
             return aRet;
         }
+
+        public static string UploadCollection(string sUrl, out string sErrmsg, NameValueCollection data, int iTimeOut, bool IsErrResponse = false)
+        {
+            string aRet = "";
+            sErrmsg = null;
+            WebClientEx aClient = new WebClientEx(iTimeOut);
+
+            try
+            {
+                byte[] byRemoteInfo = aClient.UploadValues(sUrl, "POST", data);
+                aRet = Encoding.UTF8.GetString(byRemoteInfo);
+            }
+            catch (WebException e)
+            {
+                sErrmsg = e.Message;
+                if (IsErrResponse)
+                {
+                    if (e.Response != null && e.Response.GetResponseStream().CanRead)
+                    {
+                        StreamReader myReader = new StreamReader(e.Response.GetResponseStream(), Encoding.GetEncoding("utf-8"));
+                        sErrmsg = myReader.ReadToEnd();
+                        myReader.Close();
+                    }
+                }
+                aClient.Dispose();
+                return "";
+            }
+            aClient.Dispose();
+            return aRet;
+        }
+
 
         #endregion
 

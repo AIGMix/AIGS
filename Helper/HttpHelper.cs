@@ -156,11 +156,14 @@ namespace AIGS.Helper
                     foreach (string key in PostData.Keys)
                         str.AppendFormat("&{0}={1}", key, PostData[key]);
                     data = Encoding.UTF8.GetBytes(str.ToString().Substring(1));
+
+                    //string textstr = System.Text.Encoding.UTF8.GetString(data);
                 }
                 else if (PostJson != null)
                     data = Encoding.UTF8.GetBytes(PostJson);
                 if (data != null)
                 {
+                    request.ContentLength = data.Length;
                     using (Stream stream = request.GetRequestStream())
                     {
                         stream.Write(data, 0, data.Length);
