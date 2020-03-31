@@ -301,8 +301,10 @@ namespace AIGS.Helper
             {
                 if (bIsImmediately)
                 {
-                    for (int i = 0; i < m_ThreadArrary.Count; i++)
-                        ThreadHelper.Abort(m_ThreadArrary[i]);
+                    //for (int i = 0; i < m_ThreadArrary.Count; i++)
+                    //    ThreadHelper.Abort(m_ThreadArrary[i]);
+                    foreach (var item in m_ThreadArrary)
+                        ThreadHelper.Abort(item.Value);
                     for (int i = 0; i < m_ThreadShutdown.Count; i++)
                         ThreadHelper.Abort(m_ThreadShutdown[i]);
                 }
