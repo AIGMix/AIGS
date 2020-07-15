@@ -23,7 +23,9 @@ namespace AIGS.Helper
         private STATUS _status;
         public System.Windows.Media.SolidColorBrush _statuscolor;
         public string _statusmsg { get; set; }
+        private bool ShowValueInStatus;
 
+        public  int ValueInt { get { return (int)_value; } set { _value = value; OnPropertyChanged(); } }
         public  float Value { get { return _value; } set { _value = value; OnPropertyChanged(); } }
         public string Errmsg { get { return _errmsg; } set { _errmsg = value; OnPropertyChanged(); } }
         public System.Windows.Media.SolidColorBrush StatusColor { get { return _statuscolor; } set { _statuscolor = value; OnPropertyChanged(); } }
@@ -50,7 +52,11 @@ namespace AIGS.Helper
                         StatusColor = System.Windows.Media.Brushes.Green;
                         if (_value == 0 && _statusmsg.IsNotBlank())
                             return _statusmsg;
-                        return _value.ToString("#0.00") + "%";
+                        if (ShowValueInStatus)
+                        {
+                            return _value.ToString("#0.00") + "%";
+                        }
+                        return "[RUNNIG]";
                 }
             }
             set
@@ -60,15 +66,16 @@ namespace AIGS.Helper
             }
         }
 
-        public ProgressHelper()
+        public ProgressHelper(bool bShowValueInStatus = true)
         {
+            ShowValueInStatus = bShowValueInStatus;
             Clear();
-
         }
 
         public void Clear()
         {
             Value       = 0;
+            ValueInt    = 0;
             Errmsg      = null;
             Status      = STATUS.WAIT;
             StatusColor = System.Windows.Media.Brushes.Green;
@@ -78,7 +85,17 @@ namespace AIGS.Helper
         public void Update(long lCurSize, long lAllSize)
         {
             try{
-                Value = (float)(lCurSize * 100) / lAllSize;
+                Value = (float)((lCurSize * 100) / lAllSize);
+                StatusMsg = "";
+            }
+            catch { }
+        }
+
+        public void UpdateInt(long lCurSize, long lAllSize)
+        {
+            try
+            {
+                ValueInt = (int)((lCurSize * 100) / lAllSize);
                 StatusMsg = "";
             }
             catch { }

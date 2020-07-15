@@ -103,7 +103,8 @@ namespace AIGS.Helper
                                 string Accept                       = null,
                                 string Referer                      = null,
                                 bool EnableAsync                    = true,
-                                ProxyInfo Proxy                     = null)
+                                ProxyInfo Proxy                     = null,
+                                bool AllowAutoRedirect              = true)
         {
             string Errmsg = null;
             string Errrep = null;
@@ -126,6 +127,7 @@ namespace AIGS.Helper
                 request.UserAgent       = UserAgent;
                 request.Accept          = Accept;
                 request.Referer         = Referer;
+                request.AllowAutoRedirect = AllowAutoRedirect;
                 //request.Proxy           = null;
 
                 if (ElseMethod != null)
@@ -154,7 +156,10 @@ namespace AIGS.Helper
                 {
                     StringBuilder str = new StringBuilder();
                     foreach (string key in PostData.Keys)
-                        str.AppendFormat("&{0}={1}", key, PostData[key]);
+                        //str.AppendFormat("&{0}={1}", key, PostData[key]);
+                        str.AppendFormat("&{0}={1}", key, System.Web.HttpUtility.UrlEncode(PostData[key]));
+                    
+
                     data = Encoding.UTF8.GetBytes(str.ToString().Substring(1));
 
                     //string textstr = System.Text.Encoding.UTF8.GetString(data);
@@ -228,7 +233,7 @@ namespace AIGS.Helper
 
                 Errmsg = e.Message;
                 Errrep = null;
-                if (e.Response.GetResponseStream().CanRead)
+                if (e.Response != null && e.Response.GetResponseStream().CanRead)
                 {
                     StreamReader myReader = new StreamReader(e.Response.GetResponseStream(), Encoding.GetEncoding("utf-8"));
                     Errrep = myReader.ReadToEnd();
@@ -272,11 +277,13 @@ namespace AIGS.Helper
                                 string  ElseMethod                  = null,
                                 string  PostJson                    = null,
                                 bool    IsErrResponse               = false,
-                                ProxyInfo Proxy                     = null)
+                                ProxyInfo Proxy                     = null,
+                                bool    AllowAutoRedirect           = true,
+                                string Referer = null)
         {
             try
             {
-                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false, Proxy:Proxy);
+                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false, Proxy:Proxy, Referer: Referer ,AllowAutoRedirect: AllowAutoRedirect);
                 Errmsg = Res.Result.Errmsg;
                 if (IsErrResponse)
                     Errmsg = Res.Result.Errresponse;

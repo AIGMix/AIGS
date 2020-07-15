@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AIGS.Helper
@@ -271,6 +272,29 @@ namespace AIGS.Helper
             }
 
             return sRet;
+        }
+
+
+
+        public static string Base64Decode(string plainText)
+        {
+            try
+            {
+                plainText = plainText.Trim()
+                  .Replace("\n", "")
+                  .Replace("\r\n", "")
+                  .Replace("\r", "")
+                  .Replace(" ", "");
+                if (plainText.Length % 4 > 0)
+                    plainText = plainText.PadRight(plainText.Length + 4 - plainText.Length % 4, '=');
+
+                byte[] data = System.Convert.FromBase64String(plainText);
+                return Encoding.UTF8.GetString(data);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
     }
 }

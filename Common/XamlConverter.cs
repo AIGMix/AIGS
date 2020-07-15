@@ -16,8 +16,9 @@ namespace AIGS.Common
     <Window.Resources>
         <local:CategoryToSourceConverter x:Key="cts" />
         <local:StatuToNullableBoolConverter x:Key="ctnb" />
+        <local:NotEmptyToVisibilityConverter x:Key="ctnb" />
     </Window.Resources>
-
+    
      2、
      <CheckBox IsThreeState="True" IsChecked="{Binding Path= Statu, Converter={StaticResource ctnb}}" />
      

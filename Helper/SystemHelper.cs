@@ -7,7 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Management;
 using System.Net;
-using System.Windows.Forms; 
+using System.Windows.Forms;
+using System.Diagnostics;
+using AIGS.Common;
 
 namespace AIGS.Helper
 {
@@ -191,8 +193,6 @@ namespace AIGS.Helper
         [DllImport("User32.dll", EntryPoint = "FindWindowEx")]
         public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpClassName, string lpWindowName);  
 
-
-
         /// <summary>
         /// 查询Window程序是否存在
         /// </summary>
@@ -214,14 +214,53 @@ namespace AIGS.Helper
 
             return true;
         }
-        #endregion
 
-        #region 获取本机信息
-        /// <summary>  
-        /// 操作系统的登录用户名  
-        /// </summary>  
-        /// <returns>系统的登录用户名</returns>  
-        public static string GetUserName()
+        /// <summary>
+        /// 获取进程几何
+        /// </summary>
+        /// <param name="sName">进程名</param>
+        public static Process[] FindWindowProcess(string sName)
+        {
+            if (sName.IsBlank())
+                return null;
+            Process[] pro = Process.GetProcesses();
+            return pro;
+        }
+
+        /// <summary>
+        /// 查询进程是否存在
+        /// </summary>
+        /// <param name="sName">进程名</param>
+        /// <param name="ExceptSelf">排除自己</param>
+        public static bool IsProcessExist(string sName, bool ExceptSelf = true)
+        {
+            if (sName.IsBlank())
+                return false;
+
+            int id = Process.GetCurrentProcess().Id;
+            Process[] pro = FindWindowProcess(sName);
+            foreach (var item in pro)
+            {
+                if (item.ProcessName == sName)
+                {
+                    if (id == item.Id && ExceptSelf)
+                        continue;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+    #endregion
+
+    #region 获取本机信息
+    /// <summary>  
+    /// 操作系统的登录用户名  
+    /// </summary>  
+    /// <returns>系统的登录用户名</returns>  
+    public static string GetUserName()
         {
             try
             {

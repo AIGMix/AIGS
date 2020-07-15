@@ -277,12 +277,14 @@ namespace AIGS.Common
         /// </summary>
         /// <param name="enumType">类型</param>
         /// <returns></returns>
-        public static Dictionary<int, string> ConverEnumToDictionary(Type enumType)
+        public static Dictionary<int, string> ConverEnumToDictionary(Type enumType, bool bFormatString = true)
         {
             Dictionary<int, string> result = new Dictionary<int, string>();
             foreach (int key in Enum.GetValues(enumType))
             {
-                string value = Enum.GetName(enumType, key).Replace('_', ' ');
+                string value = Enum.GetName(enumType, key);
+                if (bFormatString)
+                    value = value.Replace('_', ' ');
                 result.Add(key, value);
             }
 
@@ -492,6 +494,7 @@ namespace AIGS.Common
                         if (ap.Name == sp.Name)//判断属性名是否相同  
                         {
                             ap.SetValue(a, sp.GetValue(b, null), null);//获得b对象属性的值复制给a对象的属性  
+                            break;
                         }
                     }
                 }

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 namespace AIGS.Helper
 {
@@ -272,5 +273,6 @@ namespace AIGS.Helper
                 pRet.Add(sGroup, sList);
             return pRet;
         }
+
     }
 }
