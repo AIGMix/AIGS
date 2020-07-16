@@ -31,7 +31,7 @@ namespace AIGS.Common
         }
         public static bool IsEnglish(this string str)
         {
-            return StringHelper.IsEnglisth(str);
+            return StringHelper.IsEnglish(str);
         }
         public static string ToPassword(this string str, bool equalLen = false)
         {
