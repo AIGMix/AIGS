@@ -19,7 +19,6 @@ namespace AIGS.Common
         #region IntPtr与其他类型的转换
 
         #region struct<->IntPtr
-
         /// <summary>
         /// 功能描述：根据指针和需要解析的结构体的数量，解析数据指针里面对应的结构体数据
         /// </summary>
@@ -34,9 +33,8 @@ namespace AIGS.Common
                 IntPtr ipOneOfT;
                 T[] aRetStructs = new T[iNum];
                 if (iNum <= 0)
-                {
                     return aRetStructs;
-                }
+
                 int iSizeOfStruct = Marshal.SizeOf(typeof(T));
                 byte[] byBuffer = new byte[iNum * iSizeOfStruct];
                 Marshal.Copy(in_pStructure, byBuffer, 0, byBuffer.Length);
@@ -60,9 +58,6 @@ namespace AIGS.Common
             return pRet[0];
         }
 
-
-
-
         /// <summary>
         ///功能描述:将c#里面的托管的结构体转换为非托管的结构体，以指针的形式传入到动态库中调用
         /// <typeparam name="T">模板类型参数</typeparam>
@@ -73,18 +68,15 @@ namespace AIGS.Common
         {
             try
             {
-                IntPtr intPtr;
                 int i = 0;
                 int intSize = Marshal.SizeOf(typeof(T));
-                intPtr = Marshal.AllocHGlobal(intSize * iNum);
+                IntPtr intPtr = Marshal.AllocHGlobal(intSize * iNum);
                 foreach (T var in aStructures)
                 {
                     IntPtr newPtr = new IntPtr(intPtr.ToInt32() + i * intSize);
                     Marshal.StructureToPtr(var, newPtr, false);
                     i++;
                 }
-
-
                 return intPtr;
             }
             catch (Exception exc)
@@ -100,7 +92,6 @@ namespace AIGS.Common
             IntPtr pTmp = ConvertManageStructToIntPtr<T>(info, 1);
             return pTmp;
         }
-
 
         #endregion
 
@@ -201,7 +192,6 @@ namespace AIGS.Common
             Marshal.Copy(in_pByte, pRet, 0, in_ByteNum);
             return pRet;
         }
-
         #endregion
 
         #region free IntPtr
@@ -256,21 +246,58 @@ namespace AIGS.Common
         #endregion
 
         #region enum->Hash<int,string>
+
+        public static Dictionary<string, string> ConverStringToEnum(string sString, string sSplitRecord=",", string sSplitKeyValue="#")
+        {
+            sString = sString.Trim();
+            if (sString.IsBlank())
+                return null;
+            try
+            {
+                Dictionary<string, string> pRet = new Dictionary<string, string>();
+                string[] sItems = sString.Split(sSplitRecord);
+                foreach (string item in sItems)
+                {
+                    string[] sRecord = item.Split(sSplitKeyValue);
+                    if (sRecord.Count() != 2)
+                        return null;
+                    pRet.Add(sRecord[0], sRecord[1]);
+                }
+                return pRet;
+            }
+            catch
+            {
+                return null;
+            }
+
+        }
+
         /// <summary>
         /// 枚举转字典
         /// </summary>
         /// <param name="enumType">类型</param>
         /// <returns></returns>
-        public static Dictionary<int, string> ConverEnumToDictionary(Type enumType)
+        public static Dictionary<int, string> ConverEnumToDictionary(Type enumType, bool bFormatString = true)
         {
             Dictionary<int, string> result = new Dictionary<int, string>();
             foreach (int key in Enum.GetValues(enumType))
             {
                 string value = Enum.GetName(enumType, key);
+                if (bFormatString)
+                    value = value.Replace('_', ' ');
                 result.Add(key, value);
             }
 
             return result;
+        }
+
+        public static List<int> ConverEnumToList(Type enumType)
+        {
+            Dictionary<int, string> pHash = ConverEnumToDictionary(enumType);
+            List<int> pRet = new List<int>();
+            for (int i = 0; i < pHash.Count; i++)
+                pRet.Add(pHash.ElementAt(i).Key);
+            return pRet;
         }
 
         /// <summary>
@@ -321,6 +348,7 @@ namespace AIGS.Common
                 return iDefaultEnum;
 
             sEnum = iIgnoreUpLower ? sEnum.ToLower() : sEnum;
+            sEnum = sEnum.Replace(' ', '_');
 
             Array aList = Enum.GetValues(enumType);
             foreach (int key in aList)
@@ -346,9 +374,10 @@ namespace AIGS.Common
         public static int ConverStringToInt(string sValue, int iDefault = 0)
         {
             int iRet = iDefault;
-            int.TryParse(sValue, out iRet);
+            if (int.TryParse(sValue, out iRet))
+                return iRet;
 
-            return iRet;
+            return iDefault;
         }
 
         public static int[] ConverStringsToInts(string[] sArray, int iDefault = 0)
@@ -427,7 +456,6 @@ namespace AIGS.Common
             IntPtr.Zero,
             Int32Rect.Empty,
             BitmapSizeOptions.FromEmptyOptions());
-
             return wpfBitmap;
         }
 
@@ -466,6 +494,7 @@ namespace AIGS.Common
                         if (ap.Name == sp.Name)//判断属性名是否相同  
                         {
                             ap.SetValue(a, sp.GetValue(b, null), null);//获得b对象属性的值复制给a对象的属性  
+                            break;
                         }
                     }
                 }
@@ -501,6 +530,4 @@ namespace AIGS.Common
         }
         #endregion
     }
-
-    
 }

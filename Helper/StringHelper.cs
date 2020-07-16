@@ -19,10 +19,17 @@ namespace AIGS.Helper
             string text = sStr;
             for (int i = 0; i < text.Length; i++)
             {
-                if ((int)text[i] <= 127)
+                if (!IsChinese(text[i]))
                     return false;
             }
             return true;
+        }
+
+        public static bool IsChinese(char s)
+        {
+            if ((int)s > 127 && (s >= 0x4e00 && s <= 0x9fbb) && (Regex.IsMatch(s.ToString(), @"[\u4e00-\u9fbb]")))
+                return true;
+            return false;
         }
 
         /// <summary>
@@ -35,7 +42,7 @@ namespace AIGS.Helper
             string text = sStr;
             for (int i = 0; i < text.Length; i++)
             {
-                if ((int)text[i] > 127)
+                if ((int)text[i] > 127) //由于英文的范围只有在 0-127，所以大于127的为汉子
                     return false;
             }
             return true;
@@ -118,7 +125,7 @@ namespace AIGS.Helper
             else
                 return Char.ToLower(cChar1) == Char.ToLower(cChar2) ? true : false;
         }
-
+        
         /// <summary>
         /// 删除最后一行
         /// </summary>
@@ -261,11 +268,12 @@ namespace AIGS.Helper
                     continue;
 
                 cCmpChr = sString[0];
-                sRet    += sString[i];
+                sRet += sString[i];
             }
 
             return sRet;
         }
+
 
         /// <summary>
         /// 
@@ -293,6 +301,30 @@ namespace AIGS.Helper
                 }
             }
             return sb.ToString();
+        }
+
+
+
+        public static string Base64Decode(string plainText)
+        {
+            try
+            {
+                plainText = plainText.Trim()
+                  .Replace("\n", "")
+                  .Replace("\r\n", "")
+                  .Replace("\r", "")
+                  .Replace(" ", "");
+                if (plainText.Length % 4 > 0)
+                    plainText = plainText.PadRight(plainText.Length + 4 - plainText.Length % 4, '=');
+
+                byte[] data = System.Convert.FromBase64String(plainText);
+                return Encoding.UTF8.GetString(data);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+
         }
     }
 }

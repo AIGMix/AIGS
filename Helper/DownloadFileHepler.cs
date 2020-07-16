@@ -1,14 +1,7 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using AIGS.Helper;
-using System.Net;
+﻿using AIGS.Common;
 using System.IO;
-using System.Windows;
+using System.Net;
 using System.Threading.Tasks;
-
 namespace AIGS.Helper
 {
     public class DownloadFileHepler
@@ -24,7 +17,7 @@ namespace AIGS.Helper
             }
             catch
             {
-
+                 
             }
             return 0;
         }
@@ -90,9 +83,11 @@ namespace AIGS.Helper
                                   int Timeout                         = 5 * 1000,
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
-                                  bool bOnlyGetSize                   = false)
+                                  bool bOnlyGetSize                   = false,
+                                  bool bAppendFile                    = false,
+                                  HttpHelper.ProxyInfo Proxy          = null)
         {
-            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize);
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy);
             return oBj.Result;
         }
 
@@ -119,11 +114,12 @@ namespace AIGS.Helper
                                   int Timeout                         = 5 * 1000,
                                   string UserAgent                    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
-                                  bool bOnlyGetSize                   = false)
+                                  bool bOnlyGetSize                   = false,
+                                  bool bAppendFile                    = false,
+                                  HttpHelper.ProxyInfo Proxy          = null)
         {
             return Task.Run(() =>
             {
-
                 UpdateDownloadNotify UpdateMothed = UpdateFunc == null ? null : new UpdateDownloadNotify(UpdateFunc);
                 CompleteDownloadNotify CompleteMothed = CompleteFunc == null ? null : new CompleteDownloadNotify(CompleteFunc);
                 ErrDownloadNotify ErrMothed = ErrFunc == null ? null : new ErrDownloadNotify(ErrFunc);
@@ -137,6 +133,7 @@ namespace AIGS.Helper
                 RETRY_ENTRY:
                 try
                 {
+                    bool bRet = false;
                     ServicePointManager.Expect100Continue = false;
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sUrl);
@@ -147,6 +144,16 @@ namespace AIGS.Helper
                     request.UserAgent = UserAgent;
                     request.Proxy = null;
 
+                    if (Proxy != null && Proxy.Host.IsNotBlank() && Proxy.Port >= 0)
+                    {
+                        WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
+                        if (Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
+                            myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
+
+                        request.Proxy = myProxy;
+                        request.Credentials = CredentialCache.DefaultNetworkCredentials;
+                    }
+
                     //开始请求
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                     lTotalSize = response.ContentLength;
@@ -156,14 +163,15 @@ namespace AIGS.Helper
                     //创建目录
                     string pDir = Path.GetDirectoryName(sPath);
                     PathHelper.Mkdirs(pDir);
-                    if(File.Exists(sPath))
+
+                    if(File.Exists(sPath) && !bAppendFile)
                         File.Delete(sPath);
 
                     //打开文件
                     Stream myResponseStream = response.GetResponseStream();
                     //一分钟超时
                     myResponseStream.ReadTimeout = 60000;
-                    System.IO.Stream pFD = new System.IO.FileStream(sPath, System.IO.FileMode.Create);
+                    System.IO.Stream pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
 
                     //如果走到这里的话，就不能重试了，要不如进度会出错
                     RetryNum = 0;
@@ -185,11 +193,12 @@ namespace AIGS.Helper
                     {
                         CompleteMothed(lTotalSize, data);
                     }
+                    bRet = true;
 
                     RETURN_POINT:
                     pFD.Close();
                     myResponseStream.Close();
-                    return true;
+                    return bRet;
                 }
                 catch (System.Exception e)
                 {

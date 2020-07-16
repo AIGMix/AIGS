@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AIGS.Common;
 
 namespace AIGS.Helper
 {
@@ -127,7 +128,7 @@ namespace AIGS.Helper
         private static void WriteToLogFile(string sContent, string sLogPath = null)
         {
             //设置日志名
-            if (String.IsNullOrWhiteSpace(sLogPath))
+            if (sLogPath.IsBlank())
                 sLogPath = GetDefaultPathName();
 
             //创建目录

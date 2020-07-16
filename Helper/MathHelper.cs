@@ -17,9 +17,7 @@ namespace AIGS.Helper
         /// <returns></returns>
         public static double GetLineLength(double x1, double y1, double x2, double y2)
         {
-            double lineLength = 0;
-            lineLength = Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-
+            double lineLength = Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
             return lineLength;
         }
 

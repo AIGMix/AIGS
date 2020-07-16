@@ -11,24 +11,15 @@ namespace AIGS.Common
         private object key;
         private object value;
         private object desc;
-
         public object Key { get { return key; } set { this.key = value;OnPropertyChanged(); } }
         public object Value { get { return value; } set { this.value = value; OnPropertyChanged(); } }
         public object Desc { get { return desc; } set { this.desc = value; OnPropertyChanged(); } }
 
-        public Property() { }
-
-        public Property(object sKey, object sValue = null, object sDesc = null )
+        public Property(object sKey = null, object sValue = null, object sDesc = null )
         {
-            Key = sKey;
+            Key   = sKey;
             Value = sValue;
-            Desc = sDesc;
-        }
-        
-        public Property(string sKey) 
-        {
-            Key = sKey;
-            Value = "";
+            Desc  = sDesc;
         }
 
         /// <summary>

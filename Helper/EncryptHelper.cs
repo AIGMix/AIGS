@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AIGS.Common;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using AIGS.Common;
 
 namespace AIGS.Helper
 {
@@ -26,7 +22,7 @@ namespace AIGS.Helper
                 key += '@';
             return key;
         }
-
+        
         /// <summary>
         /// 加密
         /// </summary>
@@ -96,8 +92,8 @@ namespace AIGS.Helper
         /// <returns></returns>
         public string EncodeIrreversible(string data, string key)
         {
-            MD5 md5          = new MD5CryptoServiceProvider();
-            byte[] t         = md5.ComputeHash(Encoding.GetEncoding(key).GetBytes(data));
+            MD5 md5 = new MD5CryptoServiceProvider();
+            byte[] t = md5.ComputeHash(Encoding.GetEncoding(key).GetBytes(data));
             StringBuilder sb = new StringBuilder(32);
             for (int i = 0; i < t.Length; i++)
             {
@@ -107,3 +103,4 @@ namespace AIGS.Helper
         }
     }
 }
+

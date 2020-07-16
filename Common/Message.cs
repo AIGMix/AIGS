@@ -29,7 +29,6 @@ namespace AIGS.Common
         [DllImport("User32.dll", EntryPoint = "SendMessage")]
         public static extern int Send(IntPtr hWnd, int Msg, int wParam, string lParam);
 
-
         /// <summary>
         /// 异步发送
         /// </summary>

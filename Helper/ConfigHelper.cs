@@ -8,12 +8,13 @@
 *******************************************************/
 #endregion
 
+using AIGS.Common;
 using System;
-using System.Configuration;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
-
 namespace AIGS.Helper
 {
     public class ConfigHelper
@@ -52,33 +53,6 @@ namespace AIGS.Helper
         #endregion
 
         #region 配置文件基本Key值读写
-
-        ///// <summary>
-        ///// 查询配置文件的值(STRING)
-        ///// </summary>
-        ///// <param name="sKey">关键字</param>
-        ///// <param name="sGroup">组</param>
-        ///// <param name="sConfigPath">配置文件地址</param>
-        ///// <returns></returns>
-        //public static string GetValue(string sKey, string sGroup = null, string sConfigPath = null)
-        //{
-        //    if (String.IsNullOrWhiteSpace(sKey))
-        //        return "";
-
-        //    //设置配置名
-        //    if (String.IsNullOrWhiteSpace(sConfigPath))
-        //        sConfigPath = GetDefaultPathName();
-
-        //    if (String.IsNullOrWhiteSpace(sGroup))
-        //        sGroup = "";
-
-        //    //读取相应值
-        //    StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
-        //    GetPrivateProfileString(sGroup, sKey, "", sValue, MAX_VALUE_LEN, sConfigPath);
-
-        //    return sValue.ToString();
-        //}
-
         /// <summary>
         /// 查询配置文件的值(STRING)
         /// </summary>
@@ -101,7 +75,6 @@ namespace AIGS.Helper
             //读取相应值
             StringBuilder sValue = new StringBuilder(MAX_VALUE_LEN);
             GetPrivateProfileString(sGroup, sKey, sDefault, sValue, MAX_VALUE_LEN, sConfigPath);
-
             return sValue.ToString();
         }
 
@@ -166,7 +139,6 @@ namespace AIGS.Helper
                 if (bool.TryParse(sValue, out bRet))
                     return bRet;
             }
-
             return bDefault;
         }
 
@@ -185,10 +157,8 @@ namespace AIGS.Helper
             //设置配置名
             if (String.IsNullOrWhiteSpace(sConfigPath))
                 sConfigPath = GetDefaultPathName();
-
             if (String.IsNullOrWhiteSpace(sGroup))
                 sGroup = "";
-
             if (String.IsNullOrWhiteSpace(sValue))
                 sValue = "";
 
@@ -253,8 +223,56 @@ namespace AIGS.Helper
             string sRet = sPath + "\\" + sExeName + ".ini";
             return sRet;
         }
-
-
         #endregion
+
+        /// <summary>
+        /// 解析配置文件，文件中的项只有值
+        /// </summary>
+        /// <param name="sFilePath"></param>
+        /// <param name="sByFileContent"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> ParseNoEqual(string sFilePath, string sByFileContent=null)
+        {
+            Dictionary<string, List<string>> pRet = new Dictionary<string, List<string>>();
+
+            string[] sArr;
+            if (sFilePath != null && !sFilePath.IsBlank())
+            {
+                if (!File.Exists(sFilePath))
+                    return pRet;
+                sArr = FileHelper.ReadLines(sFilePath);
+            }
+            else
+            {
+                if (sByFileContent == null || sByFileContent.IsBlank())
+                    return pRet;
+                sArr = sByFileContent.Split('\n');
+            }
+            
+            string sGroup = null;
+            List<string> sList = null;
+            foreach (string item in sArr)
+            {
+                string sBuf = item.Trim();
+                if (sBuf.Length <= 0 || sBuf[0] == '#')
+                    continue;
+                else if (sBuf[0] == '[' && sBuf[sBuf.Length - 1] == ']')
+                {
+                    if(sGroup != null && !pRet.ContainsKey(sGroup))
+                        pRet.Add(sGroup, sList);
+
+                    sGroup = sBuf.Substring(1, sBuf.Length - 2);
+                    sList = new List<string>();
+                }
+                else if (sBuf == null || sList == null)
+                    continue;
+                else
+                    sList.Add(sBuf);
+            }
+            if (sGroup != null && !pRet.ContainsKey(sGroup))
+                pRet.Add(sGroup, sList);
+            return pRet;
+        }
+
     }
 }
