@@ -56,6 +56,8 @@ namespace AIGS.Helper
         {
             try
             {
+                if (aStruct == null)
+                    return null;
                 string sRet = JsonConvert.SerializeObject(aStruct);
                 return sRet;
             }

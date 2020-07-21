@@ -104,7 +104,9 @@ namespace AIGS.Helper
                                 string Referer                      = null,
                                 bool EnableAsync                    = true,
                                 ProxyInfo Proxy                     = null,
-                                bool AllowAutoRedirect              = true)
+                                bool AllowAutoRedirect              = true,
+                                string Host                         = null, 
+                                Dictionary<HttpRequestHeader, string> Headers = null)
         {
             string Errmsg = null;
             string Errrep = null;
@@ -124,11 +126,20 @@ namespace AIGS.Helper
                 request.Timeout         = Timeout;
                 request.KeepAlive       = KeepAlive;
                 request.CookieContainer = Cookie == null ? new CookieContainer() : Cookie;
-                request.UserAgent       = UserAgent;
+                //request.UserAgent       = UserAgent;
                 request.Accept          = Accept;
                 request.Referer         = Referer;
                 request.AllowAutoRedirect = AllowAutoRedirect;
-                //request.Proxy           = null;
+                if (Host.IsNotBlank())
+                    request.Host = Host;
+
+                if (Headers != null)
+                {
+                    foreach (var item in Headers)
+                    {
+                        request.Headers.Add(item.Key, item.Value);
+                    }
+                }
 
                 if (ElseMethod != null)
                     request.Method = ElseMethod;
@@ -279,11 +290,12 @@ namespace AIGS.Helper
                                 bool    IsErrResponse               = false,
                                 ProxyInfo Proxy                     = null,
                                 bool    AllowAutoRedirect           = true,
-                                string Referer = null)
+                                string Referer = null, 
+                                string Host = null)
         {
             try
             {
-                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false, Proxy:Proxy, Referer: Referer ,AllowAutoRedirect: AllowAutoRedirect);
+                var Res = GetOrPostAsync(sUrl, PostData, IsRetByte, Timeout, KeepAlive, UserAgent, ContentType, Retry, Cookie, Header, ElseMethod, PostJson, EnableAsync: false, Proxy:Proxy, Referer: Referer ,AllowAutoRedirect: AllowAutoRedirect, Host: Host);
                 Errmsg = Res.Result.Errmsg;
                 if (IsErrResponse)
                     Errmsg = Res.Result.Errresponse;

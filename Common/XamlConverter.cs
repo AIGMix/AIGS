@@ -170,6 +170,48 @@ namespace AIGS.Common
     }
 
     /// <summary>
+    /// less than -> Visibility
+    /// </summary>
+    public class LessThanIntToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value != null && (int)value < (int)parameter)
+                    return Visibility.Visible;
+                return Visibility.Hidden;
+            }
+            catch { return Visibility.Hidden; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Greater than or equal -> Visibility
+    /// </summary>
+    public class BigEqualThanIntToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value != null && (int)value >= int.Parse(parameter.ToString()))
+                    return Visibility.Visible;
+                return Visibility.Hidden;
+            }
+            catch { return Visibility.Hidden; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// bool -> Visibility
     /// </summary>
     public class BoolToVisibilityConverter : IValueConverter
