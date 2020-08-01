@@ -104,7 +104,7 @@ namespace AIGS.Common
     /// <summary>
     /// string不为空则返回true
     /// </summary>
-    public class StringNotEmptyToBallConverter : IValueConverter
+    public class StringNotEmptyToBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -125,6 +125,27 @@ namespace AIGS.Common
                 return "true";
             }
             catch { return null; }
+        }
+    }
+
+    /// <summary>
+    /// not empty -> true
+    /// </summary>
+    public class NotEmptyToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (value != null)
+                    return true;
+                return false;
+            }
+            catch { return false; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
         }
     }
 

@@ -116,24 +116,40 @@ namespace AIGS.Helper
         {
             UserFolders pRet = new UserFolders();
 
-            string sSubKey  = "software\\Microsoft";
-            string sUserFolderPath = "windows/currentversion/explorer/shell folders";
+            //string sSubKey  = "software\\Microsoft";
+            //string sUserFolderPath = "windows/currentversion/explorer/shell folders";
 
-            pRet.DesktopPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Common Desktop",    sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.FontsPath      = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Fonts",             sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.NethoodPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Nethood",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.PersonalPath   = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Personal",          sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.ProgramsPath   = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Programs",          sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.RecentPath     = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Recent",            sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.SendToPath     = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Sendto",            sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.StartMenuPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Startmenu",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.StartUpPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Startup",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.FavoritesPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Favorites",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.HistoryPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "History",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.CookiesPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Cookies",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.CachePath      = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Cache",             sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.AppdataPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Appdata",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
-            pRet.PrinthoodPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Printhood",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.DesktopPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Common Desktop",    sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.FontsPath      = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Fonts",             sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.NethoodPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Nethood",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.PersonalPath   = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Personal",          sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.ProgramsPath   = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Programs",          sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.RecentPath     = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Recent",            sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.SendToPath     = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Sendto",            sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.StartMenuPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Startmenu",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.StartUpPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Startup",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.FavoritesPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Favorites",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.HistoryPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "History",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.CookiesPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Cookies",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.CachePath      = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Cache",             sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.AppdataPath    = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Appdata",           sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+            //pRet.PrinthoodPath  = AIGS.Helper.RegistryHelper.GetValue(sUserFolderPath, "Printhood",         sSubKey, AIGS.Helper.RegistryHelper.ROOT.LOCAL_MACHINE);
+
+            pRet.DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            pRet.FontsPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            pRet.NethoodPath = Environment.GetFolderPath(Environment.SpecialFolder.NetworkShortcuts);
+            pRet.PersonalPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            pRet.ProgramsPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            pRet.RecentPath = Environment.GetFolderPath(Environment.SpecialFolder.Recent);
+            pRet.SendToPath = Environment.GetFolderPath(Environment.SpecialFolder.SendTo);
+            pRet.StartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            pRet.StartUpPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+            pRet.FavoritesPath = Environment.GetFolderPath(Environment.SpecialFolder.Favorites);
+            pRet.HistoryPath = Environment.GetFolderPath(Environment.SpecialFolder.History);
+            pRet.CookiesPath = Environment.GetFolderPath(Environment.SpecialFolder.Cookies);
+            pRet.CachePath = Environment.GetFolderPath(Environment.SpecialFolder.InternetCache);
+            pRet.AppdataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            pRet.PrinthoodPath = Environment.GetFolderPath(Environment.SpecialFolder.PrinterShortcuts);
             return pRet;
         }
         #endregion

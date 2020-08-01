@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Data;
+using System.Net;
 
 namespace AIGS.Common
 {
@@ -300,6 +301,16 @@ namespace AIGS.Common
             return pRet;
         }
 
+        public static List<T> ConverEnumToList<T>()
+        {  
+            List<T> pRet = new List<T>();
+            foreach (T key in Enum.GetValues(typeof(T)))
+            {
+                pRet.Add(key);
+            }
+            return pRet;
+        }
+
         /// <summary>
         /// INT转枚举
         /// </summary>
@@ -390,8 +401,35 @@ namespace AIGS.Common
 
         #endregion
 
+        #region cookie -> string
+        public static string ConverCookieCollectionToString(CookieCollection collection)
+        {
+            string ret = null;
+            for (int i = 0; collection!=null && i < collection.Count; i++)
+            {
+                ret += collection[i].Name + "=" + collection[i].Value;
+                if (i != collection.Count - 1)
+                    ret += ';';
+            }
+            return ret;
+        }
+
+        public static string ConverCookieCollectionToString(CookieContainer container, string url)
+        {
+            try
+            {
+                CookieCollection collection = container.GetCookies(new Uri(url));
+                return ConverCookieCollectionToString(collection);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        #endregion
+
         #region Bitmap
-        
+
         /// <summary>
         /// Byte[] -> BitmapImage
         /// </summary>
@@ -410,8 +448,9 @@ namespace AIGS.Common
                 bmp.StreamSource = new MemoryStream(sByteArray);
                 bmp.EndInit();
             }
-            catch
+            catch(Exception e)
             {
+                string msg = e.Message;
                 bmp = null;
             }
             return bmp;

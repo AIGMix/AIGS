@@ -125,8 +125,8 @@ namespace AIGS.Helper
                 request.ContentType     = ContentType;
                 request.Timeout         = Timeout;
                 request.KeepAlive       = KeepAlive;
-                request.CookieContainer = Cookie == null ? new CookieContainer() : Cookie;
-                //request.UserAgent       = UserAgent;
+                request.CookieContainer = Cookie;
+                request.UserAgent       = UserAgent;
                 request.Accept          = Accept;
                 request.Referer         = Referer;
                 request.AllowAutoRedirect = AllowAutoRedirect;
@@ -381,5 +381,9 @@ namespace AIGS.Helper
             }
         }
         #endregion
-    }
+
+
+
+
+}
 }

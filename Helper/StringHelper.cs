@@ -155,6 +155,30 @@ namespace AIGS.Helper
         }
 
 
+        public static string GetSubStringOnlyStart(string sMsg, string FindStr)
+        {
+            if (string.IsNullOrEmpty(FindStr) || string.IsNullOrEmpty(sMsg))
+                return null;
+
+            int iFindIdx = sMsg.IndexOf(FindStr);
+            if (iFindIdx < 0)
+                return null;
+
+            return sMsg.Substring(iFindIdx + FindStr.Length);
+        }
+
+        public static string GetSubStringOnlyEnd(string sMsg, string EndChar)
+        {
+            if (string.IsNullOrEmpty(EndChar) || string.IsNullOrEmpty(sMsg))
+                return null;
+
+            int iEndIdx = sMsg.IndexOf(EndChar);
+            if (iEndIdx < 0)
+                return null;
+
+            return sMsg.Substring(0, iEndIdx);
+        }
+
         /// <summary>
         /// 获取子串。
         /// </summary>
@@ -169,35 +193,18 @@ namespace AIGS.Helper
                 return sMsg;
 
             if(string.IsNullOrEmpty(FindStr))
-            {
-                int iEndIdx = sMsg.IndexOf(EndChar);
-                if (iEndIdx < 0)
-                    return null;
-
-                return sMsg.Substring(0, iEndIdx);
-            }
+                return GetSubStringOnlyEnd(sMsg, EndChar);
             else if (string.IsNullOrEmpty(EndChar))
-            {
-                int iFindIdx = sMsg.IndexOf(FindStr);
-                if (iFindIdx < 0)
-                    return null;
+                return GetSubStringOnlyStart(sMsg, FindStr);
 
+            int iFindIdx = sMsg.IndexOf(FindStr);
+            if (iFindIdx < 0)
+                return null;
+
+            int iEndIdx = sMsg.IndexOf(EndChar, iFindIdx + FindStr.Length);
+            if (iEndIdx < 0)
                 return sMsg.Substring(iFindIdx + FindStr.Length);
-            }
-            else
-            {
-                int iFindIdx = sMsg.IndexOf(FindStr);
-                if (iFindIdx < 0)
-                    return null;
-
-                int iEndIdx = sMsg.IndexOf(EndChar, iFindIdx + FindStr.Length);
-                if (iFindIdx < 0)
-                    return null;
-
-                if (iEndIdx < 0)
-                    return sMsg.Substring(iFindIdx + FindStr.Length);
-                return sMsg.Substring(iFindIdx + FindStr.Length, iEndIdx - iFindIdx - FindStr.Length);
-            }
+            return sMsg.Substring(iFindIdx + FindStr.Length, iEndIdx - iFindIdx - FindStr.Length);
         }
 
         /// <summary>

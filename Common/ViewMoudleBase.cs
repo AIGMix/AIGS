@@ -9,6 +9,12 @@ namespace AIGS.Common
 {
     public class ViewMoudleBase : INotifyPropertyChanged
     {
+        //public static event EventHandler<PropertyChangedEventArgs> StaticPropertyChanged;
+        protected static void OnPropertyChangedStatic(EventHandler<PropertyChangedEventArgs> StaticPropertyChanged, [CallerMemberName] string propertyName = null)
+        {
+            StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

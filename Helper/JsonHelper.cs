@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using AIGS.Common;
+using Newtonsoft.Json.Serialization;
 
 namespace AIGS.Helper
 {
@@ -27,16 +28,17 @@ namespace AIGS.Helper
                 return default(T);
             try
             {
+                string sjson = sStr;
                 foreach (string sName in sKeyName)
                 {
-                    JObject jo = JObject.Parse(sStr);
+                    JObject jo = JObject.Parse(sjson);
                     if(jo[sName] == null)
                         return default(T);
 
-                    sStr = jo[sName].ToString();
+                    sjson = jo[sName].ToString();
                 }
             
-                T pRet = JsonConvert.DeserializeObject<T>(sStr);
+                T pRet = JsonConvert.DeserializeObject<T>(sjson);
                 return pRet;
             }
             catch(Exception e)
@@ -51,21 +53,50 @@ namespace AIGS.Helper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="aStruct"></param>
+        /// <param name="bOnlyHaveMemberAttr">只转换参数前加了 [JsonProperty("名称")] 的参数 </param>
         /// <returns></returns>
-        public static string ConverObjectToString<T>(T aStruct)
+        public static string ConverObjectToString<T>(T aStruct, bool bOnlyHaveMemberAttr = false)
         {
             try
             {
                 if (aStruct == null)
                     return null;
-                string sRet = JsonConvert.SerializeObject(aStruct);
-                return sRet;
+                if(bOnlyHaveMemberAttr == false)
+                    return JsonConvert.SerializeObject(aStruct);
+                else
+                {
+                    return JsonConvert.SerializeObject(aStruct, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings { ContractResolver = new DynamicContractResolver(typeof(T))});
+                }
             }
             catch
             {
                 return "";
             }
         }
+
+        class DynamicContractResolver : DefaultContractResolver
+        {
+            private readonly Type _type;
+            public DynamicContractResolver(Type type)
+            {
+                _type = type;
+            }
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+            {
+                IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
+                IList<JsonProperty> propertiesReturn = new List<JsonProperty>();
+                foreach (JsonProperty item in properties)
+                {
+                    string PropertyNameTemp = item.PropertyName.ToLower().Trim();
+                    if (type == _type && !item.HasMemberAttribute)
+                        continue;
+                    propertiesReturn.Add(item);
+                }
+                return propertiesReturn;
+            }
+        }
+
+
 
         /// <summary>
         /// 将字典类型序列化为json字符串
@@ -115,16 +146,16 @@ namespace AIGS.Helper
 
             try
             {
+                string sjson = sStr;
                 foreach (string sName in sKeyName)
                 {
-                    JObject jo = JObject.Parse(sStr);
+                    JObject jo = JObject.Parse(sjson);
                     if (jo[sName] == null)
                         return null;
 
-                    sStr = jo[sName].ToString();
+                    sjson = jo[sName].ToString();
                 }
-
-                return sStr;
+                return sjson;
             }
             catch
             {

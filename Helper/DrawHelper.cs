@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Windows.Media.Imaging;
 
 namespace AIGS.Helper
@@ -70,5 +71,20 @@ namespace AIGS.Helper
             return aImage;
         }
 
+        public static Image GetImageFromNet(string url)
+        {
+            Image img;
+            try
+            {
+                WebRequest request = WebRequest.Create(url);
+                using (WebResponse response = request.GetResponse())
+                    img = Image.FromStream(response.GetResponseStream());
+            }
+            catch
+            {
+                img = null;
+            }
+            return img;
+        }
     }
 }

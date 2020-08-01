@@ -64,6 +64,7 @@ namespace AIGS.Helper
             if (key.IsBlank())
                 return data;
 
+            key = FormatKey(key, 8);
             byte[] byKey = System.Text.ASCIIEncoding.ASCII.GetBytes(key);
             byte[] byIV = System.Text.ASCIIEncoding.ASCII.GetBytes(key);
 

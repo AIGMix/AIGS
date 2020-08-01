@@ -188,16 +188,15 @@ namespace AIGS.Helper
                                 goto RETURN_POINT;
                         }
                     }
-
-                    if (CompleteMothed != null)
-                    {
-                        CompleteMothed(lTotalSize, data);
-                    }
                     bRet = true;
 
-                    RETURN_POINT:
-                    pFD.Close();
-                    myResponseStream.Close();
+                RETURN_POINT:
+                    if(pFD != null)
+                        pFD.Close();
+                    if(myResponseStream != null)
+                        myResponseStream.Close();
+                    if(bRet && CompleteMothed != null)
+                        CompleteMothed(lTotalSize, data);
                     return bRet;
                 }
                 catch (System.Exception e)
