@@ -83,7 +83,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -146,6 +146,7 @@
     <Compile Include="Helper\M3u8Helper.cs" />
     <Compile Include="Helper\MathHelper.cs" />
     <Compile Include="Helper\MssqlHelper.cs" />
+    <Compile Include="Helper\MusicHelper.cs" />
     <Compile Include="Helper\NetHelper.cs" />
     <Compile Include="Helper\NetSpeedHelper.cs" />
     <Compile Include="Helper\PathHelper.cs" />
