@@ -56,7 +56,7 @@ namespace AIGS.Helper
                         {
                             return _value.ToString("#0.00") + "%";
                         }
-                        return "[RUNNIG]";
+                        return "[RUNNING]";
                 }
             }
             set
