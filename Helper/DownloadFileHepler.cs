@@ -1,7 +1,11 @@
 ﻿using AIGS.Common;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using System.Windows.Documents;
+
 namespace AIGS.Helper
 {
     public class DownloadFileHepler
@@ -21,8 +25,6 @@ namespace AIGS.Helper
             }
             return 0;
         }
-
-
 
         /// <summary>
         /// 获取全部文件的大小
@@ -85,12 +87,13 @@ namespace AIGS.Helper
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false,
                                   bool bAppendFile                    = false,
-                                  HttpHelper.ProxyInfo Proxy          = null)
+                                  HttpHelper.ProxyInfo Proxy          = null,
+                                  int iRangeFrom                      = -1,
+                                  int iRangeTo                        = -1)
         {
-            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy);
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy, iRangeFrom, iRangeTo);
             return oBj.Result;
         }
-
 
         /// <summary>
         /// 启动下载
@@ -116,7 +119,9 @@ namespace AIGS.Helper
                                   string ContentType                  = "application/x-www-form-urlencoded; charset=UTF-8",
                                   bool bOnlyGetSize                   = false,
                                   bool bAppendFile                    = false,
-                                  HttpHelper.ProxyInfo Proxy          = null)
+                                  HttpHelper.ProxyInfo Proxy          = null,
+                                  int iRangeFrom                      = -1,
+                                  int iRangeTo                        = -1)
         {
             return Task.Run(() =>
             {
@@ -126,6 +131,7 @@ namespace AIGS.Helper
                 long lAlreadyDownloadSize = 0;
                 long lTotalSize = 0;
                 long lIncreSize = 0;
+                bool bAddRange = false;
 
                 if (RetryNum > 50)
                     RetryNum = 50;
@@ -144,6 +150,12 @@ namespace AIGS.Helper
                     request.UserAgent = UserAgent;
                     request.Proxy = null;
 
+                    if (iRangeFrom != -1 && iRangeTo != -1)
+                    {
+                        bAddRange = true;
+                        request.AddRange(iRangeFrom, iRangeTo);
+                    }
+
                     if (Proxy != null && Proxy.Host.IsNotBlank() && Proxy.Port >= 0)
                     {
                         WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
@@ -157,6 +169,8 @@ namespace AIGS.Helper
                     //开始请求
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                     lTotalSize = response.ContentLength;
+                    if (bAddRange)
+                        lTotalSize = iRangeTo - iRangeFrom;
                     if (bOnlyGetSize)
                         return (object)lTotalSize;
 
@@ -217,6 +231,66 @@ namespace AIGS.Helper
                 }
             });
         }
+
+
+
+        
+
+
+        //public static Task<bool> StartMultiThreadAsync(string sUrl,
+        //                  string sPath,
+        //                  object data = null,
+        //                  UpdateDownloadNotify UpdateFunc = null,
+        //                  CompleteDownloadNotify CompleteFunc = null,
+        //                  ErrDownloadNotify ErrFunc = null,
+        //                  int RetryNum = 0,
+        //                  int Timeout = 5 * 1000,
+        //                  string UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
+        //                  string ContentType = "application/x-www-form-urlencoded; charset=UTF-8",
+        //                  HttpHelper.ProxyInfo Proxy = null,
+        //                  int ThreadNum = 30,
+        //                  int PartSize = 1048576)
+        //{
+        //    return Task.Run(() =>
+        //    {
+        //        object iFileLength = StartAsync(sUrl, null, UserAgent: UserAgent, ContentType: ContentType, Proxy: Proxy).Result;
+        //        if (iFileLength == null || int.Parse(iFileLength.ToString()) == 0)
+        //            return false;
+
+        //        List<int[]> lRanges = new List<int[]>();
+        //        int iAt = 0;
+        //        int iLength = int.Parse(iFileLength.ToString());
+        //        while(iLength > 0)
+        //        {
+        //            if (iLength > PartSize)
+        //                lRanges.Add(new int[2] { iAt, iAt + PartSize });
+        //            else
+        //                lRanges.Add(new int[2] { iAt, iAt + iLength });
+        //            iAt += PartSize;
+        //            iLength -= PartSize;
+        //        }
+
+        //        //创建目录
+        //        string sTmpPath = Path.GetDirectoryName(sPath);
+        //        var di = new DirectoryInfo(sTmpPath);
+        //        if (!di.Exists)
+        //            di.Create();
+
+        //        ThreadPoolManager Pool = new ThreadPoolManager(ThreadNum, true);
+        //        List<string> lFiles = new List<string>();
+        //        for (int i = 0; i < lRanges.Count; i++)
+        //        {
+        //            string sFilePath = sTmpPath + '/' + i.ToString() + ".part";
+        //            lFiles.Add(sFilePath);
+        //            //Pool.AddWork()
+        //        }
+
+        //        Pool.WaitAll();
+
+        //        return true;
+        //        //return bRet;
+        //    });
+        //}
     }
 
 

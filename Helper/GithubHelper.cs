@@ -15,24 +15,46 @@ namespace AIGS.Helper
         /// <param name="sAuthor">作者名</param>
         /// <param name="sProjectName">项目名</param>
         /// <returns></returns>
-        public static string getLastReleaseVersion(string sAuthor, string sProjectName)
+        public static async Task<string> getLastReleaseVersionAsync(string sAuthor, string sProjectName)
         {
             try
             {
-                string sUrl = string.Format("https://api.github.com/repos/{0}/{1}/releases/latest", sAuthor, sProjectName);
                 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                string sErr = null;
-                object oObj = HttpHelper.GetOrPost(sUrl, out sErr);
-                if (oObj == null)
+                string sUrl = string.Format("https://api.github.com/repos/{0}/{1}/releases/latest", sAuthor, sProjectName);
+
+                HttpHelper.Result result = await HttpHelper.GetOrPostAsync(sUrl);
+                if (result.Success == false)
                     return null;
 
-                string sVer = JsonHelper.GetValue(oObj.ToString(), "tag_name");
+                string sVer = JsonHelper.GetValue(result.sData, "tag_name");
                 return sVer;
             }
             catch
             {
                 return null;
             }
+        }
+
+        public static string getLastReleaseVersion(string sAuthor, string sProjectName)
+        {
+
+            var ret = getLastReleaseVersionAsync(sAuthor, sProjectName);
+            string ver = ret.Result;
+            return ver;
+        }
+
+        /// <summary>
+        /// 获取文件链接
+        /// </summary>
+        /// <param name="sAuthor">作者名</param>
+        /// <param name="sProjectName">项目名</param>
+        /// <param name="sVer">版本</param>
+        /// <param name="sOnlineFileName">文件名</param>
+        /// <returns></returns>
+        public static string getFileUrl(string sAuthor, string sProjectName, string sVer, string sOnlineFileName)
+        {
+            string sUrl = string.Format("https://github.com/{0}/{1}/releases/download/{2}/{3}", sAuthor, sProjectName, sVer, sOnlineFileName);
+            return sUrl;
         }
 
         /// <summary>

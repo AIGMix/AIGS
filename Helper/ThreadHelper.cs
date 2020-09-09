@@ -262,6 +262,7 @@ namespace AIGS.Helper
         {
             public EventFunc Func;
             public object[] data;
+            public Semaphore Sema;
         }
 
         /// <summary>
@@ -274,9 +275,13 @@ namespace AIGS.Helper
         private object           m_LockArray      = new object();
         private Semaphore        m_Sema           = new Semaphore(0, 10000);
         private int              m_IDTmp          = 0;
-        public ThreadPoolManager(int iTreadMaxNum = 5)
+        private List<WorkItem>   m_AllTasks       = new List<WorkItem>();
+        private bool             m_EnableWaitAll  = false;
+
+        public ThreadPoolManager(int iTreadMaxNum = 5, bool bEnableWaitAll = false)
         {
             SetPoolSize(iTreadMaxNum);
+            m_EnableWaitAll = bEnableWaitAll;
         }
 
         /// <summary>
@@ -284,12 +289,23 @@ namespace AIGS.Helper
         /// </summary>
         public void AddWork(EventFunc Func, object[] data)
         {
-            WorkItem aObj = new WorkItem() { Func = Func, data = data };
+            WorkItem aObj = new WorkItem() { Func = Func, data = data, Sema = new Semaphore(0, 1) };
             lock (m_Lock)
             {
                 m_Sema.Release();
                 m_Queue.Enqueue(aObj);
+                if(m_EnableWaitAll)
+                    m_AllTasks.Add(aObj);
             }
+        }
+
+        public void WaitAll()
+        {
+            foreach (var item in m_AllTasks)
+            {
+                item.Sema.WaitOne();
+            }
+            m_AllTasks.Clear();
         }
 
         /// <summary>
@@ -390,6 +406,11 @@ namespace AIGS.Helper
                     if (aRecord == null)
                         continue;
                     aRecord.Func(aRecord.data);
+
+                    lock (m_Lock)
+                    {
+                        aRecord.Sema.Release();
+                    }
                     continue;
                 }
                 catch{}
