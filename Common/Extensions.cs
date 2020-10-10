@@ -123,6 +123,8 @@ namespace AIGS.Common
 
         public static string[] Split(this string input, params string[] separators)
         {
+            if (input.IsBlank())
+                return null;
             return input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         }
 

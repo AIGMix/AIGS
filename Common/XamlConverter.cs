@@ -253,6 +253,29 @@ namespace AIGS.Common
         }
     }
 
+    /// <summary>
+    /// unbool -> Visibility
+    /// </summary>
+    public class UnBoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                if (!(bool)value)
+                    return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+            catch { return Visibility.Collapsed; }
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+
+    
+
 
     public class RowHeaderToIndexConverter : IValueConverter
     {

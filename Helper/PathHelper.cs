@@ -1,5 +1,6 @@
 ﻿using AIGS.Common;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 namespace AIGS.Helper
@@ -89,7 +90,6 @@ namespace AIGS.Helper
             return sRet;
         }
 
-
         /// <summary>
         /// 替换路径中禁止的符号
         /// </summary>
@@ -109,6 +109,23 @@ namespace AIGS.Helper
             sPath = sPath.Replace("\\", sReplaceChar);
             sPath = sPath.Replace("*", sReplaceChar);
             sPath = sPath.Replace("\"", sReplaceChar);
+
+            if (String.IsNullOrWhiteSpace(sPath))
+                return sPath;
+            
+            List<string> array = new List<string>();
+            for (int i = 0; i < sPath.Length; i++)
+                array.Add(sPath[i].ToString());
+            
+            int len = sPath.Length;
+            while (len > 0)
+            {
+                if(array[len - 1] != ".")
+                    break;
+                array[len - 1] = sReplaceChar;
+                len--;
+            }
+            sPath = string.Join("", array.ToArray());
             return sPath;
         }
 
