@@ -132,6 +132,7 @@ namespace AIGS.Helper
                 long lTotalSize = 0;
                 long lIncreSize = 0;
                 bool bAddRange = false;
+                System.IO.Stream pFD = null;
 
                 if (RetryNum > 50)
                     RetryNum = 50;
@@ -185,7 +186,7 @@ namespace AIGS.Helper
                     Stream myResponseStream = response.GetResponseStream();
                     //一分钟超时
                     myResponseStream.ReadTimeout = 60000;
-                    System.IO.Stream pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
+                    pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
 
                     //如果走到这里的话，就不能重试了，要不如进度会出错
                     RetryNum = 0;
@@ -206,7 +207,10 @@ namespace AIGS.Helper
 
                 RETURN_POINT:
                     if(pFD != null)
+                    {    
                         pFD.Close();
+                        File.Delete(sPath);
+                    }
                     if(myResponseStream != null)
                         myResponseStream.Close();
                     if(bRet && CompleteMothed != null)
@@ -215,6 +219,11 @@ namespace AIGS.Helper
                 }
                 catch (System.Exception e)
                 {
+                    if (pFD != null)
+                    {
+                        pFD.Close();
+                        File.Delete(sPath);
+                    }
                     if (RetryNum > 0)
                     {
                         RetryNum--;
