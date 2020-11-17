@@ -147,7 +147,7 @@ namespace AIGS.Helper
 
                 if (!string.IsNullOrEmpty(Header))
                 {
-                    request.Headers = new WebHeaderCollection();
+                    //request.Headers = new WebHeaderCollection();
                     request.Headers.Add(Header);
                 }
 
@@ -156,7 +156,6 @@ namespace AIGS.Helper
                     WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
                     if(Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
                         myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
-
                     request.Proxy = myProxy;
                     request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 }
@@ -168,7 +167,7 @@ namespace AIGS.Helper
                     StringBuilder str = new StringBuilder();
                     foreach (string key in PostData.Keys)
                         //str.AppendFormat("&{0}={1}", key, PostData[key]);
-                        str.AppendFormat("&{0}={1}", key, System.Web.HttpUtility.UrlEncode(PostData[key]));
+                        str.AppendFormat("&{0}={1}", System.Web.HttpUtility.UrlEncode(key), System.Web.HttpUtility.UrlEncode(PostData[key]));
                     
 
                     data = Encoding.UTF8.GetBytes(str.ToString().Substring(1));
