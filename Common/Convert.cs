@@ -568,5 +568,68 @@ namespace AIGS.Common
             return p;
         }
         #endregion
+
+        #region 单位转换
+        
+        public enum UnitType
+        {
+            GB,
+            MB,
+            KB,
+            BYTE,
+        }
+
+        public static string ConverStorageUintToString(double num, UnitType unitType)
+        {
+            int tmp = (int)unitType;
+            if (tmp == 0)
+            {
+                string str = num.ToString("0.00") + " " + ConverEnumToString(tmp, typeof(UnitType), 0);
+                return str;
+            }
+            
+            double num2 = num;
+            while (tmp != 0)
+            {
+                num /= 1024;
+                if (num < 1)
+                {
+                    string str = num2.ToString("0.00") + " " + ConverEnumToString(tmp, typeof(UnitType), 0);
+                    return str;
+                }
+
+                num2 = num;
+                tmp--;
+            }
+
+            return "0 BYTE";
+        }
+
+        public static double ConverStorageUnit(double num, UnitType srcType, UnitType descType)
+        {
+            if (num == 0)
+                return num;
+
+            int tmp = descType - srcType;
+            while(tmp != 0)
+            {
+                if (srcType < descType)
+                    num *= 1024;
+                else
+                    num /= 1024;
+
+                if (tmp > 0)
+                    tmp--;
+                else
+                    tmp++;
+            }
+            return num;
+        }
+
+        
+
+
+        #endregion
+
     }
 }

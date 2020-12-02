@@ -11,22 +11,6 @@ namespace AIGS.Helper
     public class DownloadFileHepler
     {
         /// <summary>
-        /// 获取文件大小
-        /// </summary>
-        public static long GetFileLength(string url)
-        {
-            try
-            {
-                return (long)Start(url, null, bOnlyGetSize: true, Timeout:3000, RetryNum:3, UserAgent:null, ContentType:null);
-            }
-            catch
-            {
-                 
-            }
-            return 0;
-        }
-
-        /// <summary>
         /// 获取全部文件的大小
         /// </summary>
         public static long GetAllFileLength(string[] urls)
@@ -34,7 +18,22 @@ namespace AIGS.Helper
             long lLength = 0;
             foreach (string item in urls)
             {
-                lLength += GetFileLength(item);
+                long itemLength = HttpHelper.GetHttpLength(item);  //GetFileLength(item);
+                if (itemLength <= 0)
+                    return 0;
+                lLength += itemLength;
+            }
+            return lLength;
+        }
+
+        public static long[] GetAllFileLengths(string[] urls)
+        {
+            int index = 0;
+            long[] lLength = new long[urls.Length];
+            foreach (string item in urls)
+            {
+                long itemLength = HttpHelper.GetHttpLength(item);  //GetFileLength(item);
+                lLength[index++] = itemLength;
             }
             return lLength;
         }
@@ -89,9 +88,10 @@ namespace AIGS.Helper
                                   bool bAppendFile                    = false,
                                   HttpHelper.ProxyInfo Proxy          = null,
                                   int iRangeFrom                      = -1,
-                                  int iRangeTo                        = -1)
+                                  int iRangeTo                        = -1,
+                                  int BufferSize                      = 1024)
         {
-            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy, iRangeFrom, iRangeTo);
+            var oBj = StartAsync(sUrl, sPath, data, UpdateFunc, CompleteFunc, ErrFunc, RetryNum, Timeout, UserAgent, ContentType, bOnlyGetSize, bAppendFile, Proxy, iRangeFrom, iRangeTo, BufferSize);
             return oBj.Result;
         }
 
@@ -121,7 +121,8 @@ namespace AIGS.Helper
                                   bool bAppendFile                    = false,
                                   HttpHelper.ProxyInfo Proxy          = null,
                                   int iRangeFrom                      = -1,
-                                  int iRangeTo                        = -1)
+                                  int iRangeTo                        = -1,
+                                  int BufferSize = 1024)
         {
             return Task.Run(() =>
             {
@@ -144,7 +145,7 @@ namespace AIGS.Helper
                     ServicePointManager.Expect100Continue = false;
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sUrl);
-                    request.Method = "GET";
+                    request.Method = bOnlyGetSize ? "HEAD":"GET";
                     request.ContentType = ContentType;
                     request.Timeout = Timeout;
                     //request.KeepAlive       = true;
@@ -167,6 +168,10 @@ namespace AIGS.Helper
                         request.Credentials = CredentialCache.DefaultNetworkCredentials;
                     }
 
+                    //垃圾回收，将一些已经废掉的正在保持的http链接丢掉
+                    //System.Net.ServicePointManager.DefaultConnectionLimit设置的http链接有一定上限
+                    System.GC.Collect();
+
                     //开始请求
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                     lTotalSize = response.ContentLength;
@@ -186,11 +191,12 @@ namespace AIGS.Helper
                     Stream myResponseStream = response.GetResponseStream();
                     //一分钟超时
                     myResponseStream.ReadTimeout = 60000;
-                    pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
-
+                    //pFD = new System.IO.FileStream(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
+                    pFD = Alphaleonis.Win32.Filesystem.File.Open(sPath, bAppendFile ? System.IO.FileMode.Append : System.IO.FileMode.Create);
+                   
                     //如果走到这里的话，就不能重试了，要不如进度会出错
                     RetryNum = 0;
-                    byte[] buf = new byte[1024];
+                    byte[] buf = new byte[BufferSize];
                     int size = 0;
                     while ((size = myResponseStream.Read(buf, 0, (int)buf.Length)) > 0)
                     {
@@ -209,7 +215,6 @@ namespace AIGS.Helper
                     if(pFD != null)
                     {    
                         pFD.Close();
-                        File.Delete(sPath);
                     }
                     if(myResponseStream != null)
                         myResponseStream.Close();

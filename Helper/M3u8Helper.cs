@@ -24,8 +24,16 @@ namespace AIGS.Helper
             return pList.ToArray();
         }
 
-        public delegate bool ProgressNotify(long lCurSize, long lAllSize);
-        public static bool Download(string[] pTsUrls, string sOutFile, ProgressNotify pFunc, HttpHelper.ProxyInfo Proxy = null)
+        struct DownloadData
+        {
+            public long AllSize;
+            public long AlreadyDownloadSize;
+            public ProgressNotify Func;
+        }
+
+        public delegate bool ProgressNotify(long lTotalSize, long lAlreadyDownloadSize, long lIncreSize, object indata);
+
+        public static bool Download(string[] pTsUrls, string sOutFile, ProgressNotify pFunc, ref string errmsg, HttpHelper.ProxyInfo Proxy = null)
         {
             if (pTsUrls == null || pTsUrls.Count() <= 0)
                 return false;
@@ -34,25 +42,57 @@ namespace AIGS.Helper
                 System.IO.File.Delete(sOutFile);
 
             int iCount = pTsUrls.Count();
+            long []fileLengths = DownloadFileHepler.GetAllFileLengths(pTsUrls);
+            long allSize = 0;
+            foreach (long item in fileLengths)
+            {
+                allSize += item;
+                if (item <= 0)
+                {
+                    allSize = 0;
+                    break;
+                }
+            }
+            if (allSize <= 0)
+            {
+                errmsg = "Get file length failed.";
+                return false;
+            }
+
+            if (!pFunc(allSize, 0, 0, null))
+                return false;
+
+            DownloadData data = new DownloadData();
+            data.AllSize = allSize;
+            data.AlreadyDownloadSize = 0;
+            data.Func = pFunc;
+
             for (int i = 0; i < iCount; i++)
             {
-                if (!pFunc(i, iCount))
-                    return false;
-
                 bool bRet = true;
-                for (int j = 0; j < 100; j++)
+                for (int j = 0; j < 3; j++)
                 {
-                    bRet = (bool)DownloadFileHepler.Start(pTsUrls[i], sOutFile, bAppendFile: true, Timeout: 3 * 1000, Proxy: Proxy);
-                    if (!pFunc(i, iCount))
-                        return false;
-                    if (bRet)
-                        break;
+                    bRet = (bool)DownloadFileHepler.Start(pTsUrls[i], sOutFile, data, bAppendFile: true, Timeout: 3 * 1000, Proxy: Proxy, RetryNum:3, UpdateFunc: UpdateDownloadNotify);
+                    if (!bRet)
+                        continue;
+
+                    data.AlreadyDownloadSize += fileLengths[i];
+                    break;
                 }
                 if (!bRet)
+                {
+                    errmsg = "Download some part-files failed.";
                     return false;
+                }
             }
-            pFunc(iCount, iCount);
+            pFunc(allSize, allSize, 0, null);
             return true;
+        }
+
+        private static bool UpdateDownloadNotify(long lTotalSize, long lAlreadyDownloadSize, long lIncreSize, object indata)
+        {
+            DownloadData data = (DownloadData)indata;
+            return data.Func(data.AllSize, data.AlreadyDownloadSize + lAlreadyDownloadSize, lIncreSize, null);
         }
     }
 }

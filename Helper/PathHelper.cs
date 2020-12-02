@@ -159,8 +159,9 @@ namespace AIGS.Helper
                 return false;
             if(Directory.Exists(sPath))
                 return true;
-            
-            Directory.CreateDirectory(sPath);
+
+            Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(sPath);
+            //Directory.CreateDirectory(sPath);
             if (!Directory.Exists(sPath))
                 return false;
             return true;

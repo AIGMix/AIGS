@@ -382,7 +382,28 @@ namespace AIGS.Helper
         #endregion
 
 
+        public static long GetHttpLength(string url)
+        {
+            long length = 0;
+            try
+            {
+                var req = (HttpWebRequest)WebRequest.CreateDefault(new Uri(url));
+                req.Method = "HEAD";
+                req.Timeout = 5000;
+                var res = (HttpWebResponse)req.GetResponse();
+                if (res.StatusCode == HttpStatusCode.OK)
+                {
+                    length = res.ContentLength;
+                }
 
+                res.Close();
+                return length;
+            }
+            catch (WebException wex)
+            {
+                return 0;
+            }
+        }
 
-}
+    }
 }
