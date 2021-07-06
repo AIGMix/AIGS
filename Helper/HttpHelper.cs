@@ -88,6 +88,14 @@ namespace AIGS.Helper
             }
         }
 
+        public static WebProxy GetWebProxy(ProxyInfo Proxy)
+        {
+            WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
+            if (Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
+                myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
+            return myProxy;
+        }
+
         public static async Task<Result> GetOrPostAsync(string sUrl,
                                 Dictionary<string, string> PostData = null,
                                 bool IsRetByte                      = false,
@@ -153,10 +161,7 @@ namespace AIGS.Helper
 
                 if (Proxy != null && Proxy.Host.IsNotBlank() && Proxy.Port >= 0)
                 {
-                    WebProxy myProxy = new WebProxy(Proxy.Host, Proxy.Port);
-                    if(Proxy.Username.IsNotBlank() && Proxy.Password.IsNotBlank())
-                        myProxy.Credentials = new NetworkCredential(Proxy.Username, Proxy.Password);
-                    request.Proxy = myProxy;
+                    request.Proxy = GetWebProxy(Proxy);
                     request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 }
 
@@ -401,6 +406,7 @@ namespace AIGS.Helper
             }
             catch (WebException wex)
             {
+                wex.ToString();
                 return 0;
             }
         }
