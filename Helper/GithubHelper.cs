@@ -9,38 +9,47 @@ namespace AIGS.Helper
 {
     public class GithubHelper
     {
+        public struct VER
+        {
+            public string version;
+            public string desc;
+        }
+
         /// <summary>
         /// 获取最新的版本
         /// </summary>
         /// <param name="sAuthor">作者名</param>
         /// <param name="sProjectName">项目名</param>
         /// <returns></returns>
-        public static async Task<string> getLastReleaseVersionAsync(string sAuthor, string sProjectName)
+        public static async Task<VER> getLastReleaseVersionAsync(string sAuthor, string sProjectName)
         {
+            VER ret;
+            ret.version = "";
+            ret.desc = "";
             try
             {
                 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 string sUrl = string.Format("https://api.github.com/repos/{0}/{1}/releases/latest", sAuthor, sProjectName);
-
+                
                 HttpHelper.Result result = await HttpHelper.GetOrPostAsync(sUrl);
                 if (result.Success == false)
-                    return null;
+                    return ret;
 
-                string sVer = JsonHelper.GetValue(result.sData, "tag_name");
-                return sVer;
+                ret.version = JsonHelper.GetValue(result.sData, "tag_name");
+                ret.desc = JsonHelper.GetValue(result.sData, "body");
+                return ret;
             }
             catch
             {
-                return null;
+                return ret;
             }
         }
 
-        public static string getLastReleaseVersion(string sAuthor, string sProjectName)
+        public static VER getLastReleaseVersion(string sAuthor, string sProjectName)
         {
 
             var ret = getLastReleaseVersionAsync(sAuthor, sProjectName);
-            string ver = ret.Result;
-            return ver;
+            return ret.Result;
         }
 
         /// <summary>
@@ -67,11 +76,11 @@ namespace AIGS.Helper
         /// <returns></returns>
         public static bool getLastReleaseFile(string sAuthor, string sProjectName, string sOnlineFileName, string sOutputPath)
         {
-            string sVer = getLastReleaseVersion(sAuthor, sProjectName);
-            if (sVer.IsBlank())
+            VER sVer = getLastReleaseVersion(sAuthor, sProjectName);
+            if (sVer.version.IsBlank())
                 return false;
 
-            string sUrl = string.Format("https://github.com/{0}/{1}/releases/download/{2}/{3}", sAuthor, sProjectName, sVer, sOnlineFileName);
+            string sUrl = string.Format("https://github.com/{0}/{1}/releases/download/{2}/{3}", sAuthor, sProjectName, sVer.version, sOnlineFileName);
             bool bRet = (bool)DownloadFileHepler.Start(sUrl, sOutputPath,RetryNum:5);
             return bRet;
         }
