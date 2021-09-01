@@ -109,6 +109,8 @@ namespace AIGS.Helper
             sPath = sPath.Replace("\\", sReplaceChar);
             sPath = sPath.Replace("*", sReplaceChar);
             sPath = sPath.Replace("\"", sReplaceChar);
+            sPath = sPath.Replace("\n", "");
+            sPath = sPath.Replace("\t", "");
 
             if (String.IsNullOrWhiteSpace(sPath))
                 return sPath;
