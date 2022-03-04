@@ -1,0 +1,36 @@
+name: AIGS
+
+on: [push, pull_request]
+
+jobs:
+  Build:
+    name: Build AIGS
+    runs-on: windows-latest
+
+    steps:
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1  
+
+    - name: Checkout AIGS repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Patch AIGS.csproj artifact
+      run: |
+        $File = "AIGS.csproj"
+        (Get-Content $File) -replace "v4.6.1", "v4.8" | Set-Content $File
+        (Get-Content $File) -replace [regex]::escape('..\Tidal-Media-Downloader-PRO\TIDALDL-UI-PRO\'), "" | Set-Content $File
+        (Get-Content $File) -replace [regex]::escape('..\Suda\Suda\'), "" | Set-Content $File
+
+    - name: Intall AIGS dependencies
+      run: msbuild -t:restore -p:RestorePackagesConfig=true
+
+    - name: Build AIGS artifact
+      run: msbuild AIGS.csproj -verbosity:diag -property:Configuration=Debug
+
+    - name: Upload AIGS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: AIGS
+        path: bin\Debug\AIGS.dll
