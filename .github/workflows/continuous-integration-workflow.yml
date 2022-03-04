@@ -16,13 +16,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Patch AIGS.csproj artifact
-      run: |
-        $File = "AIGS.csproj"
-        (Get-Content $File) -replace "v4.6.1", "v4.8" | Set-Content $File
-        (Get-Content $File) -replace [regex]::escape('..\Tidal-Media-Downloader-PRO\TIDALDL-UI-PRO\'), "" | Set-Content $File
-        (Get-Content $File) -replace [regex]::escape('..\Suda\Suda\'), "" | Set-Content $File
-
     - name: Intall AIGS dependencies
       run: msbuild -t:restore -p:RestorePackagesConfig=true
 
