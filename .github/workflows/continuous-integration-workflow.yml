@@ -12,7 +12,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1  
 
     - name: Checkout AIGS repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -23,7 +23,7 @@ jobs:
       run: msbuild AIGS.csproj -verbosity:diag -property:Configuration=Debug
 
     - name: Upload AIGS artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: AIGS
         path: bin\Debug\AIGS.dll
